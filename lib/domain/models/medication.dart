@@ -1,3 +1,5 @@
+import 'clinical_taper.dart';
+
 enum DosageUnit {
   mg,
   ml,
@@ -31,6 +33,32 @@ enum MedCategory {
   other,
 }
 
+enum OphthalmicFormulation {
+  solution,
+  suspension,
+  emulsion,
+  gel,
+  ointment,
+}
+
+enum PillShape {
+  round,
+  oval,
+  capsule,
+  oblong,
+  diamond,
+  dropperBottle,
+  inhaler,
+  patch,
+  other,
+}
+
+enum PillScoring {
+  unscored,
+  singleScored,
+  doubleScored,
+}
+
 class Medication {
   final String id;
   final String name;
@@ -59,6 +87,21 @@ class Medication {
   final int eyeDropGapMinutes; // Default 5 to 10 min between drops
   final bool contactLensWarning;
   final bool isOintment;
+  final OphthalmicFormulation ophthalmicFormulation;
+  final String profileId; // Multi-patient profile isolation
+  final ClinicalTaperPlan? taperPlan; // Optional titration/tapering plan
+  final double? halfLifeHours; // Pharmacological half-life for missed dose calculus
+
+  // Advanced Multi-Regimen Scheduling (Days of week & Cycle)
+  final List<int> scheduledDaysOfWeek; // 1 = Monday ... 7 = Sunday. Empty = every day
+  final int? cycleDaysOn; // e.g. 21 days
+  final int? cycleDaysOff; // e.g. 7 days
+
+  // Visual Pill Identification Characteristics
+  final PillShape pillShape;
+  final PillScoring pillScoring;
+  final String? pillImprint;
+  final String pillColorName;
 
   Medication({
     required this.id,
@@ -88,6 +131,17 @@ class Medication {
     this.eyeDropGapMinutes = 5,
     this.contactLensWarning = false,
     this.isOintment = false,
+    this.ophthalmicFormulation = OphthalmicFormulation.solution,
+    this.profileId = 'default_profile',
+    this.taperPlan,
+    this.halfLifeHours,
+    this.scheduledDaysOfWeek = const [],
+    this.cycleDaysOn,
+    this.cycleDaysOff,
+    this.pillShape = PillShape.round,
+    this.pillScoring = PillScoring.unscored,
+    this.pillImprint,
+    this.pillColorName = 'White',
   });
 
   bool get needsRefill => totalInventoryCount <= refillThreshold;
@@ -120,27 +174,57 @@ class Medication {
   bool get isExpiringSoon {
     if (expiryDate == null) return false;
     final diff = expiryDate!.difference(DateTime.now()).inDays;
-    return diff >= 0 && diff <= 30;
+    return diff <= 30 && diff >= 0;
   }
 
-  // After-opening expiry for eye drops / eye ointments (typically 28 days)
-  int? get daysRemainingAfterOpening {
-    if (openedDate == null || afterOpeningDays == null) return null;
-    final openedLimit = openedDate!.add(Duration(days: afterOpeningDays!));
-    final remaining = openedLimit.difference(DateTime.now()).inDays;
-    return remaining;
-  }
-
-  bool get isOpenedWindowClosingSoon {
-    final remaining = daysRemainingAfterOpening;
-    if (remaining == null) return false;
-    return remaining <= 7 && remaining >= 0;
-  }
-
+  // 28-day opened eye drop rule
   bool get isOpenedWindowExpired {
-    final remaining = daysRemainingAfterOpening;
-    if (remaining == null) return false;
-    return remaining < 0;
+    if (openedDate == null || afterOpeningDays == null) return false;
+    final diff = DateTime.now().difference(openedDate!).inDays;
+    return diff >= afterOpeningDays!;
+  }
+
+  int? get openedDaysRemaining {
+    if (openedDate == null || afterOpeningDays == null) return null;
+    final elapsed = DateTime.now().difference(openedDate!).inDays;
+    return (afterOpeningDays! - elapsed).clamp(0, 999);
+  }
+
+  /// Determines whether this medication is scheduled to be taken on a specific calendar date
+  bool isScheduledForDay(DateTime date) {
+    // 1. Date boundaries check
+    if (startDate != null) {
+      final startOnly = DateTime(startDate!.year, startDate!.month, startDate!.day);
+      final targetOnly = DateTime(date.year, date.month, date.day);
+      if (targetOnly.isBefore(startOnly)) return false;
+    }
+    if (endDate != null) {
+      final endOnly = DateTime(endDate!.year, endDate!.month, endDate!.day);
+      final targetOnly = DateTime(date.year, date.month, date.day);
+      if (targetOnly.isAfter(endOnly)) return false;
+    }
+
+    // 2. Day of week check (e.g. Mon/Wed/Fri)
+    if (scheduledDaysOfWeek.isNotEmpty) {
+      if (!scheduledDaysOfWeek.contains(date.weekday)) {
+        return false;
+      }
+    }
+
+    // 3. Cyclic / intermittent regimen check (e.g. 21 days on, 7 days off)
+    if (cycleDaysOn != null && cycleDaysOff != null && cycleDaysOn! > 0 && cycleDaysOff! > 0) {
+      final start = startDate ?? DateTime(2026, 1, 1);
+      final daysSinceStart = date.difference(start).inDays;
+      if (daysSinceStart >= 0) {
+        final cycleLength = cycleDaysOn! + cycleDaysOff!;
+        final dayInCycle = daysSinceStart % cycleLength;
+        if (dayInCycle >= cycleDaysOn!) {
+          return false; // In "off" period of the cycle
+        }
+      }
+    }
+
+    return true;
   }
 
   Map<String, dynamic> toJson() {
@@ -172,6 +256,17 @@ class Medication {
       'eyeDropGapMinutes': eyeDropGapMinutes,
       'contactLensWarning': contactLensWarning,
       'isOintment': isOintment,
+      'ophthalmicFormulation': ophthalmicFormulation.index,
+      'profileId': profileId,
+      'taperPlan': taperPlan?.toJson(),
+      'halfLifeHours': halfLifeHours,
+      'scheduledDaysOfWeek': scheduledDaysOfWeek,
+      'cycleDaysOn': cycleDaysOn,
+      'cycleDaysOff': cycleDaysOff,
+      'pillShape': pillShape.index,
+      'pillScoring': pillScoring.index,
+      'pillImprint': pillImprint,
+      'pillColorName': pillColorName,
     };
   }
 
@@ -204,10 +299,22 @@ class Medication {
       eyeDropGapMinutes: json['eyeDropGapMinutes'] as int? ?? 5,
       contactLensWarning: json['contactLensWarning'] as bool? ?? false,
       isOintment: json['isOintment'] as bool? ?? false,
+      ophthalmicFormulation: OphthalmicFormulation.values[(json['ophthalmicFormulation'] as int? ?? 0).clamp(0, OphthalmicFormulation.values.length - 1)],
+      profileId: json['profileId'] as String? ?? 'default_profile',
+      taperPlan: json['taperPlan'] != null ? ClinicalTaperPlan.fromJson(json['taperPlan'] as Map<String, dynamic>) : null,
+      halfLifeHours: (json['halfLifeHours'] as num?)?.toDouble(),
+      scheduledDaysOfWeek: (json['scheduledDaysOfWeek'] as List<dynamic>?)?.map((e) => e as int).toList() ?? const [],
+      cycleDaysOn: json['cycleDaysOn'] as int?,
+      cycleDaysOff: json['cycleDaysOff'] as int?,
+      pillShape: PillShape.values[(json['pillShape'] as int? ?? 0).clamp(0, PillShape.values.length - 1)],
+      pillScoring: PillScoring.values[(json['pillScoring'] as int? ?? 0).clamp(0, PillScoring.values.length - 1)],
+      pillImprint: json['pillImprint'] as String?,
+      pillColorName: json['pillColorName'] as String? ?? 'White',
     );
   }
 
   Medication copyWith({
+    String? id,
     String? name,
     String? strength,
     MedCategory? category,
@@ -234,9 +341,20 @@ class Medication {
     int? eyeDropGapMinutes,
     bool? contactLensWarning,
     bool? isOintment,
+    OphthalmicFormulation? ophthalmicFormulation,
+    String? profileId,
+    ClinicalTaperPlan? taperPlan,
+    double? halfLifeHours,
+    List<int>? scheduledDaysOfWeek,
+    int? cycleDaysOn,
+    int? cycleDaysOff,
+    PillShape? pillShape,
+    PillScoring? pillScoring,
+    String? pillImprint,
+    String? pillColorName,
   }) {
     return Medication(
-      id: id,
+      id: id ?? this.id,
       name: name ?? this.name,
       strength: strength ?? this.strength,
       category: category ?? this.category,
@@ -263,6 +381,17 @@ class Medication {
       eyeDropGapMinutes: eyeDropGapMinutes ?? this.eyeDropGapMinutes,
       contactLensWarning: contactLensWarning ?? this.contactLensWarning,
       isOintment: isOintment ?? this.isOintment,
+      ophthalmicFormulation: ophthalmicFormulation ?? this.ophthalmicFormulation,
+      profileId: profileId ?? this.profileId,
+      taperPlan: taperPlan ?? this.taperPlan,
+      halfLifeHours: halfLifeHours ?? this.halfLifeHours,
+      scheduledDaysOfWeek: scheduledDaysOfWeek ?? this.scheduledDaysOfWeek,
+      cycleDaysOn: cycleDaysOn ?? this.cycleDaysOn,
+      cycleDaysOff: cycleDaysOff ?? this.cycleDaysOff,
+      pillShape: pillShape ?? this.pillShape,
+      pillScoring: pillScoring ?? this.pillScoring,
+      pillImprint: pillImprint ?? this.pillImprint,
+      pillColorName: pillColorName ?? this.pillColorName,
     );
   }
 }

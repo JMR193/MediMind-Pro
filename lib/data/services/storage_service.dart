@@ -8,7 +8,8 @@ import '../../domain/models/app_settings.dart';
 import '../../domain/models/symptom_log.dart';
 import '../../domain/models/caregiver.dart';
 import '../../domain/models/ai_message.dart';
-
+import '../../domain/models/clinical_vitals.dart';
+import 'resilient_storage_engine.dart';
 class StorageService {
   static const String _medsKey = 'medimind_medications_v2';
   static const String _logsKey = 'medimind_logs_v2';
@@ -18,6 +19,7 @@ class StorageService {
   static const String _symptomsKey = 'medimind_symptoms_v2';
   static const String _caregiversKey = 'medimind_caregivers_v2';
   static const String _streaksKey = 'medimind_streaks_v2';
+  static const String _vitalsKey = 'medimind_vitals_v1';
 
   final SharedPreferences _prefs;
 
@@ -32,6 +34,7 @@ class StorageService {
   Future<void> saveMedications(List<Medication> meds) async {
     final listJson = meds.map((m) => m.toJson()).toList();
     await _prefs.setString(_medsKey, jsonEncode(listJson));
+    ResilientStorageEngine().commitTable('medications', listJson);
   }
 
   List<Medication> loadMedications() {
@@ -49,6 +52,7 @@ class StorageService {
   Future<void> saveLogs(List<MedicationLog> logs) async {
     final listJson = logs.map((l) => l.toJson()).toList();
     await _prefs.setString(_logsKey, jsonEncode(listJson));
+    ResilientStorageEngine().commitTable('logs', listJson);
   }
 
   List<MedicationLog> loadLogs() {
@@ -79,7 +83,10 @@ class StorageService {
     }
   }
 
-  // User Profile persistence
+  static const String _profilesKey = 'medimind_profiles_multi_v1';
+  static const String _activeProfileKey = 'medimind_active_profile_id_v1';
+
+  // User Profile persistence (Single & Multi-Profile)
   Future<void> saveProfile(UserProfile profile) async {
     await _prefs.setString(_profileKey, jsonEncode(profile.toJson()));
   }
@@ -92,6 +99,31 @@ class StorageService {
     } catch (e) {
       return null;
     }
+  }
+
+  Future<void> saveProfiles(List<UserProfile> profiles) async {
+    final listJson = profiles.map((p) => p.toJson()).toList();
+    await _prefs.setString(_profilesKey, jsonEncode(listJson));
+    ResilientStorageEngine().commitTable('profiles', listJson);
+  }
+
+  List<UserProfile> loadProfiles() {
+    final rawJson = _prefs.getString(_profilesKey);
+    if (rawJson == null || rawJson.isEmpty) return [];
+    try {
+      final List decoded = jsonDecode(rawJson);
+      return decoded.map((item) => UserProfile.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<void> saveActiveProfileId(String id) async {
+    await _prefs.setString(_activeProfileKey, id);
+  }
+
+  String? loadActiveProfileId() {
+    return _prefs.getString(_activeProfileKey);
   }
 
   // Settings persistence
@@ -156,5 +188,31 @@ class StorageService {
     } catch (e) {
       return const StreakData();
     }
+  }
+
+  // Clinical Vitals persistence
+  Future<void> saveVitals(List<ClinicalVitalRecord> vitals) async {
+    final listJson = vitals.map((v) => v.toJson()).toList();
+    await _prefs.setString(_vitalsKey, jsonEncode(listJson));
+    // Asynchronously commit to WAL
+    ResilientStorageEngine().commitTable('vitals', listJson);
+  }
+
+  List<ClinicalVitalRecord> loadVitals() {
+    final rawJson = _prefs.getString(_vitalsKey);
+    if (rawJson == null || rawJson.isEmpty) return [];
+    try {
+      final List decoded = jsonDecode(rawJson);
+      return decoded.map((item) => ClinicalVitalRecord.fromJson(item as Map<String, dynamic>)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Right to be Forgotten (GDPR) & System Reset
+  /// Purges all local SharedPreferences and WAL database files.
+  Future<void> purgeAllData() async {
+    await _prefs.clear();
+    await ResilientStorageEngine().purgeAllTables();
   }
 }

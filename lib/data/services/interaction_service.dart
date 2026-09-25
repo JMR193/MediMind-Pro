@@ -61,6 +61,40 @@ class ConditionContraindicationWarning {
   });
 }
 
+class MissedDoseAdvice {
+  final String actionTitle; // e.g. "Take Missed Dose Now", "Skip This Dose"
+  final String rationale;
+  final String clinicalGuidelines;
+  final bool shouldTakeNow;
+  final bool isUrgent;
+  final String warningAlert;
+
+  const MissedDoseAdvice({
+    required this.actionTitle,
+    required this.rationale,
+    required this.clinicalGuidelines,
+    required this.shouldTakeNow,
+    this.isUrgent = false,
+    this.warningAlert = 'Never double up on doses to compensate for a missed dose.',
+  });
+}
+
+class BeersCriteriaWarning {
+  final String medicationName;
+  final String riskCategory;
+  final String clinicalConcern;
+  final String recommendation;
+  final String suggestedAlternative;
+
+  const BeersCriteriaWarning({
+    required this.medicationName,
+    required this.riskCategory,
+    required this.clinicalConcern,
+    required this.recommendation,
+    required this.suggestedAlternative,
+  });
+}
+
 /// Clinical Drug-Drug Interaction (DDI) & Food Safety Service
 /// 100% On-Device pharmacology safety engine.
 class InteractionService {
@@ -371,6 +405,169 @@ class InteractionService {
               clinicalRecommendation: rule.recommendation,
             ));
           }
+        }
+      }
+    }
+
+    return warnings;
+  }
+
+  /// Evaluates pharmacological missed-dose decision logic based on interval percentage and half-life
+  MissedDoseAdvice evaluateMissedDose({
+    required Medication medication,
+    required DateTime scheduledTime,
+    required DateTime currentTime,
+  }) {
+    final diffMinutes = currentTime.difference(scheduledTime).inMinutes;
+    final nameLower = medication.name.toLowerCase();
+
+    // 1. Anticoagulants (Warfarin, Apixaban, Rivaroxaban) - High Bleeding/Clotting Risk
+    if (nameLower.contains('warfarin') || nameLower.contains('coumadin') || nameLower.contains('eliquis') || nameLower.contains('xarelto')) {
+      if (diffMinutes < 360) {
+        // Less than 6 hours late
+        return const MissedDoseAdvice(
+          actionTitle: 'Take Missed Dose Now',
+          rationale: 'Anticoagulant therapeutic window is critical to prevent thromboembolism.',
+          clinicalGuidelines: 'Take the missed dose as soon as remembered today. If not remembered until tomorrow, skip the missed dose and resume normal schedule.',
+          shouldTakeNow: true,
+          isUrgent: true,
+        );
+      } else {
+        return const MissedDoseAdvice(
+          actionTitle: 'Skip This Dose — Resume Tomorrow',
+          rationale: 'Exceeding 6 hours near next dose creates severe hemorrhage risk.',
+          clinicalGuidelines: 'Skip today\'s missed dose completely. Do NOT take extra tablets. Log this missed dose for your hematologist/INR review.',
+          shouldTakeNow: false,
+          isUrgent: true,
+        );
+      }
+    }
+
+    // 2. Ophthalmic Eye Drops (Glaucoma Prostaglandins, Beta Blockers)
+    if (medication.category == MedCategory.eyeDrop || medication.category == MedCategory.eyeOintment) {
+      if (diffMinutes < 180) {
+        return const MissedDoseAdvice(
+          actionTitle: 'Instill Eye Drop Now',
+          rationale: 'Intraocular pressure (IOP) control requires sustained receptor saturation.',
+          clinicalGuidelines: 'Instill 1 drop now and perform punctal occlusion (pinch inner corner of eye for 60 seconds). If another drop is scheduled within 10 minutes, wait at least 5-10 minutes between drops.',
+          shouldTakeNow: true,
+        );
+      } else {
+        return const MissedDoseAdvice(
+          actionTitle: 'Skip Dose & Resume Next Scheduled Drop',
+          rationale: 'Close successive eye drops cause drug washout without added IOP lowering.',
+          clinicalGuidelines: 'Skip this drop. Resume at the next scheduled time. Never instill multiple drops simultaneously.',
+          shouldTakeNow: false,
+        );
+      }
+    }
+
+    // 3. Levothyroxine (Thyroid)
+    if (nameLower.contains('levothyroxine') || nameLower.contains('synthroid') || nameLower.contains('eltroxin')) {
+      return const MissedDoseAdvice(
+        actionTitle: 'Take on Empty Stomach',
+        rationale: 'Levothyroxine absorption is severely hindered by food, coffee, or calcium/iron.',
+        clinicalGuidelines: 'Take now with a full glass of water, ensuring at least 30-60 minutes before eating or drinking anything other than water.',
+        shouldTakeNow: true,
+      );
+    }
+
+    // 4. Standard Half-Interval Rule
+    // For Once Daily: interval is 24h -> 50% is 12h
+    // For Twice Daily: interval is 12h -> 50% is 6h
+    // For Three Times Daily: interval is 8h -> 50% is 4h
+    int intervalMinutes = 24 * 60;
+    if (medication.scheduleTimes.length == 2) {
+      intervalMinutes = 12 * 60;
+    } else if (medication.scheduleTimes.length >= 3) {
+      intervalMinutes = 8 * 60;
+    }
+
+    final halfInterval = intervalMinutes / 2;
+
+    if (diffMinutes <= halfInterval) {
+      return MissedDoseAdvice(
+        actionTitle: 'Take Missed Dose Now',
+        rationale: 'Less than half the dosing interval has elapsed ($diffMinutes min late vs ${halfInterval.toInt()} min limit).',
+        clinicalGuidelines: 'Take your dose now with appropriate food/water instruction (${medication.instruction.name}). Resume your next scheduled dose at the usual time.',
+        shouldTakeNow: true,
+      );
+    } else {
+      return MissedDoseAdvice(
+        actionTitle: 'Skip Missed Dose & Wait for Next',
+        rationale: 'More than half the dosing interval has passed. Taking now would risk peak plasma accumulation.',
+        clinicalGuidelines: 'Skip the missed dose entirely. Take your next scheduled dose at the regular time. Never double dose.',
+        shouldTakeNow: false,
+      );
+    }
+  }
+
+  /// Evaluates AGS Beers Criteria for Potentially Inappropriate Medication Use in Older Adults (65+)
+  List<BeersCriteriaWarning> checkBeersCriteria({
+    required List<Medication> medications,
+    required int? patientAge,
+  }) {
+    if (patientAge == null || patientAge < 65) return [];
+
+    final List<BeersCriteriaWarning> warnings = [];
+    final Set<String> seen = {};
+
+    for (final med in medications) {
+      final nameLower = med.name.toLowerCase();
+
+      // 1. First-generation Antihistamines / Anticholinergics
+      if (nameLower.contains('diphenhydramine') || nameLower.contains('hydroxyzine') || nameLower.contains('chlorpheniramine') || nameLower.contains('promethazine')) {
+        if (!seen.contains(med.name)) {
+          seen.add(med.name);
+          warnings.add(BeersCriteriaWarning(
+            medicationName: med.name,
+            riskCategory: 'High Anticholinergic Burden',
+            clinicalConcern: 'Causes severe confusion, dry mouth, urinary retention, constipation, and heightened fall risk in older adults.',
+            recommendation: 'Avoid use. Consider non-sedating 2nd generation antihistamines (cetirizine, fexofenadine) or topical saline.',
+            suggestedAlternative: 'Loratadine or Fexofenadine',
+          ));
+        }
+      }
+
+      // 2. Benzodiazepines & Sedative-Hypnotics (Z-drugs)
+      if (nameLower.contains('alprazolam') || nameLower.contains('lorazepam') || nameLower.contains('diazepam') || nameLower.contains('clonazepam') || nameLower.contains('zolpidem') || nameLower.contains('zopiclone')) {
+        if (!seen.contains(med.name)) {
+          seen.add(med.name);
+          warnings.add(BeersCriteriaWarning(
+            medicationName: med.name,
+            riskCategory: 'Sedative / CNS Depressant (High Fall Risk)',
+            clinicalConcern: 'Significant risk of cognitive impairment, delirium, falls, motor vehicle accidents, and physical dependence.',
+            recommendation: 'Avoid for insomnia in elderly. Practice sleep hygiene or cognitive behavioral therapy for insomnia (CBT-I).',
+            suggestedAlternative: 'Melatonin or CBT-I sleep protocol',
+          ));
+        }
+      }
+
+      // 3. Chronic Non-COX-2 NSAIDs
+      if (nameLower.contains('ibuprofen') || nameLower.contains('naproxen') || nameLower.contains('diclofenac') || nameLower.contains('indomethacin') || nameLower.contains('ketorolac')) {
+        if (!seen.contains(med.name)) {
+          seen.add(med.name);
+          warnings.add(BeersCriteriaWarning(
+            medicationName: med.name,
+            riskCategory: 'Gastrointestinal & Renal Toxicity',
+            clinicalConcern: 'High risk of GI ulceration/hemorrhage, acute kidney injury, and exacerbation of heart failure or hypertension.',
+            recommendation: 'Use shortest duration possible. Consider topical NSAIDs (voltaren gel) or acetaminophen for osteoarthritis.',
+            suggestedAlternative: 'Acetaminophen (Tylenol) or Topical Diclofenac Gel',
+          ));
+        }
+      }
+
+      // 4. Sulfonylureas (Long-acting Hypoglycemics)
+      if (nameLower.contains('glibenclamide') || nameLower.contains('glyburide') || nameLower.contains('glimepiride')) {
+        if (!seen.contains(med.name)) {
+          seen.add(med.name);
+          warnings.add(BeersCriteriaWarning(
+            medicationName: med.name,
+            riskCategory: 'Prolonged Severe Hypoglycemia',
+            clinicalConcern: 'High risk of severe, prolonged hypoglycemia leading to syncope and cardiovascular events in older patients.',
+            recommendation: 'Avoid glyburide/glimepiride. Prefer short-acting agents, DPP-4 inhibitors, or SGLT2 inhibitors under endocrinologist guidance.',
+            suggestedAlternative: 'DPP-4 Inhibitors (Sitagliptin) or Metformin',
+          ));
         }
       }
     }

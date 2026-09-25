@@ -2,6 +2,9 @@
 class UserProfile {
   final String id;
   final String name;
+  final String relationship; // 'Self', 'Mother', 'Father', 'Child', 'Spouse', 'Pet', 'Other'
+  final bool isPrimaryUser;
+  final String colorHex;
   final DateTime? dateOfBirth;
   final String? bloodGroup;
   final String? primaryDoctorName;
@@ -11,10 +14,14 @@ class UserProfile {
   final String? allergies;
   final String? medicalConditions;
   final String? avatarPath;
+  final String? notes;
 
   const UserProfile({
     required this.id,
     required this.name,
+    this.relationship = 'Self',
+    this.isPrimaryUser = false,
+    this.colorHex = '#0284C7',
     this.dateOfBirth,
     this.bloodGroup,
     this.primaryDoctorName,
@@ -24,6 +31,7 @@ class UserProfile {
     this.allergies,
     this.medicalConditions,
     this.avatarPath,
+    this.notes,
   });
 
   int? get ageYears {
@@ -40,6 +48,9 @@ class UserProfile {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        'relationship': relationship,
+        'isPrimaryUser': isPrimaryUser,
+        'colorHex': colorHex,
         'dateOfBirth': dateOfBirth?.toIso8601String(),
         'bloodGroup': bloodGroup,
         'primaryDoctorName': primaryDoctorName,
@@ -49,11 +60,15 @@ class UserProfile {
         'allergies': allergies,
         'medicalConditions': medicalConditions,
         'avatarPath': avatarPath,
+        'notes': notes,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
         id: json['id'] as String,
         name: json['name'] as String? ?? 'Patient',
+        relationship: json['relationship'] as String? ?? 'Self',
+        isPrimaryUser: json['isPrimaryUser'] as bool? ?? false,
+        colorHex: json['colorHex'] as String? ?? '#0284C7',
         dateOfBirth: json['dateOfBirth'] != null
             ? DateTime.tryParse(json['dateOfBirth'] as String)
             : null,
@@ -65,10 +80,15 @@ class UserProfile {
         allergies: json['allergies'] as String?,
         medicalConditions: json['medicalConditions'] as String?,
         avatarPath: json['avatarPath'] as String?,
+        notes: json['notes'] as String?,
       );
 
   UserProfile copyWith({
+    String? id,
     String? name,
+    String? relationship,
+    bool? isPrimaryUser,
+    String? colorHex,
     DateTime? dateOfBirth,
     String? bloodGroup,
     String? primaryDoctorName,
@@ -78,10 +98,14 @@ class UserProfile {
     String? allergies,
     String? medicalConditions,
     String? avatarPath,
+    String? notes,
   }) =>
       UserProfile(
-        id: id,
+        id: id ?? this.id,
         name: name ?? this.name,
+        relationship: relationship ?? this.relationship,
+        isPrimaryUser: isPrimaryUser ?? this.isPrimaryUser,
+        colorHex: colorHex ?? this.colorHex,
         dateOfBirth: dateOfBirth ?? this.dateOfBirth,
         bloodGroup: bloodGroup ?? this.bloodGroup,
         primaryDoctorName: primaryDoctorName ?? this.primaryDoctorName,
@@ -92,5 +116,6 @@ class UserProfile {
         allergies: allergies ?? this.allergies,
         medicalConditions: medicalConditions ?? this.medicalConditions,
         avatarPath: avatarPath ?? this.avatarPath,
+        notes: notes ?? this.notes,
       );
 }

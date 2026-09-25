@@ -46,6 +46,18 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   int _eyeGapMinutes = 5;
   bool _contactLensWarning = false;
 
+  // Multi-Regimen Scheduling (Days of week & Cycle)
+  List<int> _scheduledDaysOfWeek = [];
+  int? _cycleDaysOn;
+  int? _cycleDaysOff;
+
+  // Visual Pill Identification Characteristics
+  PillShape _pillShape = PillShape.round;
+  PillScoring _pillScoring = PillScoring.unscored;
+  final _pillImprintCtrl = TextEditingController();
+  String _pillColorName = 'White';
+  OphthalmicFormulation _ophthalmicFormulation = OphthalmicFormulation.solution;
+
   static const _colorOptions = [
     '#0284C7', '#059669', '#D97706', '#DC2626',
     '#7C3AED', '#0D9488', '#DB2777', '#65A30D',
@@ -85,6 +97,14 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       _eyeTarget = med.eyeTarget;
       _eyeGapMinutes = med.eyeDropGapMinutes;
       _contactLensWarning = med.contactLensWarning;
+      _scheduledDaysOfWeek = List.from(med.scheduledDaysOfWeek);
+      _cycleDaysOn = med.cycleDaysOn;
+      _cycleDaysOff = med.cycleDaysOff;
+      _pillShape = med.pillShape;
+      _pillScoring = med.pillScoring;
+      _pillImprintCtrl.text = med.pillImprint ?? '';
+      _pillColorName = med.pillColorName;
+      _ophthalmicFormulation = med.ophthalmicFormulation;
     }
   }
 
@@ -95,6 +115,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     _doctorCtrl.dispose();
     _rxCtrl.dispose();
     _notesCtrl.dispose();
+    _pillImprintCtrl.dispose();
     super.dispose();
   }
 
@@ -121,6 +142,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               _buildSection('Medication Identity', _buildIdentitySection()),
               _buildSection('Dosage, Frequency & Dates', _buildDosageSection()),
               _buildSection('Eye Medication Protocol & Timing', _buildEyeDropSection()),
+              _buildSection('Visual Pill & Drug Identification', _buildPillIdentificationSection()),
               _buildSection('Inventory & Expiry Tracking', _buildInventorySection()),
               _buildSection('Clinical Details & Prescriber', _buildClinicalSection()),
               _buildSection('Appearance & Priority', _buildAppearanceSection()),
@@ -320,6 +342,70 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 );
               }),
             ),
+            const SizedBox(height: 16),
+            const Text('Scheduled Days of Week', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              children: [
+                {'day': 1, 'label': 'Mon'},
+                {'day': 2, 'label': 'Tue'},
+                {'day': 3, 'label': 'Wed'},
+                {'day': 4, 'label': 'Thu'},
+                {'day': 5, 'label': 'Fri'},
+                {'day': 6, 'label': 'Sat'},
+                {'day': 7, 'label': 'Sun'},
+              ].map((d) {
+                final dayNum = d['day'] as int;
+                final isSelected = _scheduledDaysOfWeek.contains(dayNum);
+                return FilterChip(
+                  label: Text(d['label'] as String),
+                  selected: isSelected,
+                  onSelected: (val) {
+                    setState(() {
+                      if (val) {
+                        _scheduledDaysOfWeek.add(dayNum);
+                      } else {
+                        _scheduledDaysOfWeek.remove(dayNum);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            if (_scheduledDaysOfWeek.isEmpty)
+              const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text('Takes every day (Default)', style: TextStyle(fontSize: 11, color: Colors.grey)),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: _cycleDaysOn?.toString() ?? '',
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Cycle Days ON (e.g. 21)',
+                      prefixIcon: Icon(Icons.play_circle_outline),
+                    ),
+                    onChanged: (v) => _cycleDaysOn = int.tryParse(v),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    initialValue: _cycleDaysOff?.toString() ?? '',
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Cycle Days OFF (e.g. 7)',
+                      prefixIcon: Icon(Icons.pause_circle_outline),
+                    ),
+                    onChanged: (v) => _cycleDaysOff = int.tryParse(v),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -342,6 +428,29 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             ),
             if (_isEyeDrop) ...[
               const Divider(),
+              DropdownButtonFormField<OphthalmicFormulation>(
+                value: _ophthalmicFormulation,
+                decoration: const InputDecoration(
+                  labelText: 'Formulation Ladder Type',
+                  prefixIcon: Icon(Icons.layers_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(value: OphthalmicFormulation.solution, child: Text('1. Solution (Thin drop)')),
+                  DropdownMenuItem(value: OphthalmicFormulation.suspension, child: Text('2. Suspension (Shake well)')),
+                  DropdownMenuItem(value: OphthalmicFormulation.emulsion, child: Text('3. Emulsion (Milky drop)')),
+                  DropdownMenuItem(value: OphthalmicFormulation.gel, child: Text('4. Gel (Viscous drop)')),
+                  DropdownMenuItem(value: OphthalmicFormulation.ointment, child: Text('5. Ointment (Thick salve - apply last)')),
+                ],
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() {
+                      _ophthalmicFormulation = v;
+                      if (v == OphthalmicFormulation.ointment) _isOintment = true;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
               SwitchListTile(
                 title: const Text('Eye Ointment Form'),
                 subtitle: const Text('Ointments must be applied LAST, after all liquid drops'),
@@ -375,6 +484,73 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 onChanged: (v) => setState(() => _contactLensWarning = v),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPillIdentificationSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<PillShape>(
+                    value: _pillShape,
+                    decoration: const InputDecoration(labelText: 'Pill Shape', prefixIcon: Icon(Icons.category_outlined)),
+                    items: PillShape.values.map((s) => DropdownMenuItem(value: s, child: Text(s.name.toUpperCase()))).toList(),
+                    onChanged: (v) { if (v != null) setState(() => _pillShape = v); },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<PillScoring>(
+                    value: _pillScoring,
+                    decoration: const InputDecoration(labelText: 'Scoring', prefixIcon: Icon(Icons.border_style)),
+                    items: PillScoring.values.map((s) => DropdownMenuItem(value: s, child: Text(s.name))).toList(),
+                    onChanged: (v) { if (v != null) setState(() => _pillScoring = v); },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _pillImprintCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Imprint Code / Markings',
+                      hintText: 'e.g. ATV 20',
+                      prefixIcon: Icon(Icons.text_fields),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _pillColorName,
+                    decoration: const InputDecoration(labelText: 'Color Name', prefixIcon: Icon(Icons.color_lens_outlined)),
+                    items: const [
+                      DropdownMenuItem(value: 'White', child: Text('White')),
+                      DropdownMenuItem(value: 'Blue', child: Text('Blue')),
+                      DropdownMenuItem(value: 'Yellow', child: Text('Yellow')),
+                      DropdownMenuItem(value: 'Red', child: Text('Red')),
+                      DropdownMenuItem(value: 'Green', child: Text('Green')),
+                      DropdownMenuItem(value: 'Orange', child: Text('Orange')),
+                      DropdownMenuItem(value: 'Pink', child: Text('Pink')),
+                      DropdownMenuItem(value: 'Clear/Teal', child: Text('Clear/Teal')),
+                    ],
+                    onChanged: (v) { if (v != null) setState(() => _pillColorName = v); },
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -602,6 +778,14 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       eyeDropGapMinutes: _eyeGapMinutes,
       contactLensWarning: _contactLensWarning,
       isOintment: _isOintment,
+      ophthalmicFormulation: _ophthalmicFormulation,
+      scheduledDaysOfWeek: _scheduledDaysOfWeek,
+      cycleDaysOn: _cycleDaysOn,
+      cycleDaysOff: _cycleDaysOff,
+      pillShape: _pillShape,
+      pillScoring: _pillScoring,
+      pillImprint: _pillImprintCtrl.text.trim().isEmpty ? null : _pillImprintCtrl.text.trim(),
+      pillColorName: _pillColorName,
     );
 
     if (widget.editMedication == null) {

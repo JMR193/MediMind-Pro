@@ -26,6 +26,16 @@ import 'ui/features/lock/app_lock_screen.dart';
 import 'ui/features/medications/refill_tracker_screen.dart';
 import 'ui/features/medications/interaction_matrix_screen.dart';
 import 'ui/features/profile/emergency_medical_id_screen.dart';
+import 'ui/features/medications/digital_pillbox_screen.dart';
+import 'ui/features/eye_drop_assistant/punctal_occlusion_screen.dart';
+import 'ui/features/medications/tapering_schedule_screen.dart';
+import 'ui/features/profile/family_profiles_screen.dart';
+import 'ui/features/vitals/vitals_tracker_screen.dart';
+import 'ui/features/renal_calculator/renal_guard_screen.dart';
+import 'ui/features/pill_identifier/pill_identifier_screen.dart';
+import 'ui/features/compliance/compliance_screen.dart';
+import 'ui/features/qr_share/qr_code_share_screen.dart';
+import 'ui/core/in_app_notification_overlay.dart';
 
 import 'data/services/device_integration_service.dart';
 
@@ -99,6 +109,11 @@ class MediMindApp extends StatelessWidget {
                 GlobalCupertinoLocalizations.delegate,
               ],
               debugShowCheckedModeBanner: false,
+              builder: (context, child) {
+                return InAppNotificationOverlay(
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
               home: const AppLockScreen(
                 child: MainShell(),
               ),
@@ -310,12 +325,93 @@ class _MainShellState extends State<MainShell> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.grid_view_rounded, color: Color(0xFF0284C7)),
+            title: const Text('Digital 4-Slot Pillbox'),
+            subtitle: const Text('Morning, Noon, Evening & Bedtime 1-tap take'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DigitalPillboxScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.compress_rounded, color: Color(0xFF7C3AED)),
+            title: const Text('Punctal Occlusion Timer'),
+            subtitle: const Text('Prevent systemic absorption of eye drops'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PunctalOcclusionScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.trending_down_rounded, color: Color(0xFF0D9488)),
+            title: const Text('Clinical Tapering Protocols'),
+            subtitle: const Text('Steroid step-down & titration timelines'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TaperingScheduleScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite_rounded, color: Color(0xFFE11D48)),
+            title: const Text('Clinical Vitals & Glaucoma IOP'),
+            subtitle: const Text('Blood pressure, diurnal eye pressure & glucose'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const VitalsTrackerScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.calculate_outlined, color: Color(0xFF0284C7)),
+            title: const Text('Renal & Hepatic Guard'),
+            subtitle: const Text('CrCl & eGFR dosage adjustment safety calculator'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const RenalGuardScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.family_restroom_rounded, color: Color(0xFFEA580C)),
+            title: const Text('Family & Patient Profiles'),
+            subtitle: const Text('Switch between parents, kids & dependents'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const FamilyProfilesScreen()));
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.local_fire_department_outlined, color: Color(0xFFEA580C)),
             title: const Text('Streaks & Badges'),
             subtitle: const Text('Gamified adherence achievements'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (_) => const StreakScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.saved_search_rounded, color: Color(0xFF6366F1)),
+            title: const Text('Visual Pill & Drug Identifier'),
+            subtitle: const Text('Filter by shape, color, imprint & scoring'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PillIdentifierScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.qr_code_2_rounded, color: Color(0xFF0D9488)),
+            title: const Text('Quick Response (QR) Hub'),
+            subtitle: const Text('Share regimen & import prescriptions with DDI check'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const QrCodeShareScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.verified_user_outlined, color: Color(0xFF059669)),
+            title: const Text('HIPAA & GDPR Compliance'),
+            subtitle: const Text('Zero-cloud audit, WCAG 2.1 AA & Right to be Forgotten'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplianceScreen()));
             },
           ),
           const Divider(),
@@ -355,6 +451,32 @@ class _MainShellState extends State<MainShell> {
               onTap: () {
                 Navigator.pop(ctx);
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const AddMedicationScreen()));
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: const Color(0xFFE11D48).withAlpha(26), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.favorite_rounded, color: Color(0xFFE11D48)),
+              ),
+              title: const Text('Log Clinical Vitals / IOP Pressure'),
+              subtitle: const Text('Record blood pressure, eye pressure or glucose'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const VitalsTrackerScreen()));
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: const Color(0xFF0D9488).withAlpha(26), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.trending_down_rounded, color: Color(0xFF0D9488)),
+              ),
+              title: const Text('Setup Clinical Taper / Titration Plan'),
+              subtitle: const Text('Pre-built post-op steroid step-down regimens'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const TaperingScheduleScreen()));
               },
             ),
             ListTile(
@@ -407,6 +529,32 @@ class _MainShellState extends State<MainShell> {
               onTap: () {
                 Navigator.pop(ctx);
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const RefillTrackerScreen()));
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: const Color(0xFF0D9488).withAlpha(26), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.qr_code_2_rounded, color: Color(0xFF0D9488)),
+              ),
+              title: const Text('Quick Response (QR) Share & Import'),
+              subtitle: const Text('Share regimen or scan incoming prescriptions'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const QrCodeShareScreen()));
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: const Color(0xFF6366F1).withAlpha(26), borderRadius: BorderRadius.circular(8)),
+                child: const Icon(Icons.saved_search_rounded, color: Color(0xFF6366F1)),
+              ),
+              title: const Text('Identify Pill by Shape / Color'),
+              subtitle: const Text('Search active cabinet or clinical drug library'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const PillIdentifierScreen()));
               },
             ),
             const SizedBox(height: 12),

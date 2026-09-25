@@ -20,7 +20,19 @@ import '../device_integration/device_optimization_screen.dart';
 import '../medications/refill_tracker_screen.dart';
 import '../medications/interaction_matrix_screen.dart';
 import '../profile/emergency_medical_id_screen.dart';
+import '../medications/digital_pillbox_screen.dart';
+import '../eye_drop_assistant/punctal_occlusion_screen.dart';
+import '../medications/tapering_schedule_screen.dart';
+import '../profile/family_profiles_screen.dart';
+import '../vitals/vitals_tracker_screen.dart';
+import '../renal_calculator/renal_guard_screen.dart';
+import '../caregiver/caregiver_screen.dart';
+import '../pill_identifier/pill_identifier_screen.dart';
+import '../qr_share/qr_code_share_screen.dart';
+import '../compliance/compliance_screen.dart';
+import '../../../data/services/chronotherapy_research_service.dart';
 import '../../../data/services/ai_assistant_service.dart';
+import '../../../data/services/offline_backup_vault_service.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -57,6 +69,10 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 16),
 
+              // Multi-Patient Family Profile Switcher Bar
+              _buildProfileSwitcherBar(context, repo),
+              const SizedBox(height: 16),
+
               // OEM Device Reliability & Battery Exemption Banner
               _buildOemReliabilityBanner(context),
               const SizedBox(height: 16),
@@ -66,6 +82,9 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 16),
               // AI Proactive Daily Tasks & Education Widget
               _buildAiDailyTasksCard(context),
+              const SizedBox(height: 16),
+              // ISPOR / WHO Research Chronotherapy Biomarker Score Card
+              _buildChronotherapyHealthScoreCard(context, repo),
               const SizedBox(height: 16),
               // Active Eye Drop Protocol Timer Banner
               if (eyeSession != null) ...[
@@ -256,6 +275,161 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProfileSwitcherBar(BuildContext context, MedicationRepository repo) {
+    final profiles = repo.profiles;
+    final activeId = repo.activeProfileId;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (final p in profiles) ...[
+            ChoiceChip(
+              avatar: CircleAvatar(
+                radius: 10,
+                backgroundColor: Color(int.parse(p.colorHex.replaceAll('#', '0xFF'))),
+                child: Text(p.name[0], style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              label: Text('${p.name} (${p.relationship})'),
+              selected: p.id == activeId,
+              selectedColor: Color(int.parse(p.colorHex.replaceAll('#', '0xFF'))).withAlpha(40),
+              onSelected: (_) {
+                AppleGlassDecorations.lightHaptic();
+                repo.switchProfile(p.id);
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
+          IconButton.outlined(
+            icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+            tooltip: 'Add Profile',
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FamilyProfilesScreen())),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChronotherapyHealthScoreCard(BuildContext context, MedicationRepository repo) {
+    final metrics = ChronotherapyResearchService.analyzeAdherence(
+      medications: repo.activeMedications,
+      logs: repo.logs,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF0D9488).withAlpha(50), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF0D9488).withAlpha(15), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D9488).withAlpha(25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.biotech_rounded, color: Color(0xFF0D9488), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Research Adherence Score', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text('ISPOR / WHO Chronotherapy Index', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0D9488).withAlpha(25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${metrics.overallHealthScore}/100',
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF0D9488)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('${metrics.pdcPercentage.toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0284C7))),
+                      const SizedBox(height: 2),
+                      const Text('PDC (Coverage)', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('${metrics.mprPercentage.toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF059669))),
+                      const SizedBox(height: 2),
+                      const Text('MPR (Possession)', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text('±${metrics.averageTimingDriftMinutes.toInt()}m', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF7C3AED))),
+                      const SizedBox(height: 2),
+                      const Text('Timing Drift', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            metrics.clinicalInterpretation,
+            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Color(0xFF0D9488)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickAccessGrid(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,6 +527,136 @@ class DashboardScreen extends StatelessWidget {
               label: 'Eye Drops',
               color: const Color(0xFF0D9488),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EyeDropScreen())),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildToolButton(
+              context,
+              icon: Icons.grid_view_rounded,
+              label: 'Pillbox',
+              color: const Color(0xFF0284C7),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DigitalPillboxScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.compress_rounded,
+              label: 'Punctal',
+              color: const Color(0xFF7C3AED),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PunctalOcclusionScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.trending_down_rounded,
+              label: 'Tapering',
+              color: const Color(0xFF0D9488),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TaperingScheduleScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.family_restroom_rounded,
+              label: 'Family',
+              color: const Color(0xFFEA580C),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FamilyProfilesScreen())),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildToolButton(
+              context,
+              icon: Icons.favorite_rounded,
+              label: 'Vitals & IOP',
+              color: const Color(0xFFE11D48),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VitalsTrackerScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.calculate_outlined,
+              label: 'Renal Guard',
+              color: const Color(0xFF0284C7),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RenalGuardScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.security_rounded,
+              label: 'Vault Export',
+              color: const Color(0xFF059669),
+              onTap: () {
+                AppleGlassDecorations.mediumHaptic();
+                final repo = context.read<MedicationRepository>();
+                OfflineBackupVaultService.exportVaultFile(
+                  medications: repo.medications,
+                  logs: repo.logs,
+                  profiles: repo.profiles,
+                  symptoms: repo.symptomLogs,
+                  vitals: repo.vitals,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Exporting 100% encrypted on-device backup vault...')),
+                );
+              },
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.people_outline,
+              label: 'Caregiver',
+              color: const Color(0xFFDB2777),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CaregiverScreen())),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildToolButton(
+              context,
+              icon: Icons.saved_search_rounded,
+              label: 'Pill ID',
+              color: const Color(0xFF6366F1),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PillIdentifierScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.qr_code_2_rounded,
+              label: 'QR Hub',
+              color: const Color(0xFF0D9488),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const QrCodeShareScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.verified_user_outlined,
+              label: 'Compliance',
+              color: const Color(0xFF059669),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplianceScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.accessibility_new_rounded,
+              label: 'Senior Mode',
+              color: const Color(0xFFD97706),
+              onTap: () {
+                final repo = context.read<MedicationRepository>();
+                final current = repo.settings.seniorModeEnabled;
+                repo.updateSettings(repo.settings.copyWith(seniorModeEnabled: !current));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(!current ? 'Senior Mode Activated (High Contrast & 64px Touch)' : 'Senior Mode Deactivated'),
+                  ),
+                );
+              },
             ),
           ],
         ),
