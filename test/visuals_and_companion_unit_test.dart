@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medication_reminder/ui/features/companion/medi_buddy_character.dart';
-import 'package:medication_reminder/ui/features/companion/companion_card_widget.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/interactive_3d_pill_viewer.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/animated_water_wave_tracker.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/ophthalmic_3d_drop_simulator.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/visual_lab_screen.dart';
+import 'package:medimind_app/ui/features/companion/medi_buddy_character.dart';
+import 'package:medimind_app/ui/features/companion/companion_card_widget.dart';
+import 'package:medimind_app/ui/features/visuals_3d/interactive_3d_pill_viewer.dart';
+import 'package:medimind_app/ui/features/visuals_3d/animated_water_wave_tracker.dart';
+import 'package:medimind_app/ui/features/visuals_3d/ophthalmic_3d_drop_simulator.dart';
+import 'package:medimind_app/ui/features/visuals_3d/visual_lab_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:medication_reminder/data/repositories/medication_repository.dart';
+import 'package:medimind_app/data/repositories/medication_repository.dart';
 
 void main() {
   testWidgets('MediBuddyCharacter renders properly across all moods and outfits', (tester) async {

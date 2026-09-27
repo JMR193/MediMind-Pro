@@ -4,6 +4,10 @@ import 'package:medimind_app/data/services/chronotherapy_research_service.dart';
 import 'package:medimind_app/domain/models/medication.dart';
 import 'package:medimind_app/domain/models/medication_log.dart';
 import 'package:medimind_app/domain/models/clinical_taper.dart';
+import 'package:medimind_app/domain/models/clinical_vitals.dart';
+import 'package:medimind_app/domain/models/user_profile.dart';
+import 'package:medimind_app/data/services/renal_hepatic_calculator_service.dart';
+import 'package:medimind_app/data/services/offline_backup_vault_service.dart';
 
 void main() {
   group('InteractionService Clinical Unit Tests', () {

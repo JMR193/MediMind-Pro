@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medication_reminder/domain/models/medication.dart';
-import 'package:medication_reminder/domain/models/medication_log.dart';
-import 'package:medication_reminder/data/services/clinical_expert_ai_service.dart';
-import 'package:medication_reminder/data/services/behavioral_ml_engine.dart';
+import 'package:medimind_app/domain/models/medication.dart';
+import 'package:medimind_app/domain/models/medication_log.dart';
+import 'package:medimind_app/data/services/clinical_expert_ai_service.dart';
+import 'package:medimind_app/data/services/behavioral_ml_engine.dart';
 
 void main() {
   group('ClinicalExpertAiService - Chronotherapy & Pharmacokinetics', () {

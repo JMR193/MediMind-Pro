@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medication_reminder/data/services/clinical_chart_assistant_service.dart';
-import 'package:medication_reminder/domain/models/medication.dart';
-import 'package:medication_reminder/domain/models/dose_log.dart';
+import 'package:medimind_app/data/services/clinical_chart_assistant_service.dart';
+import 'package:medimind_app/domain/models/medication.dart';
+import 'package:medimind_app/domain/models/dose_log.dart';
 
 void main() {
   group('ClinicalChartAssistantService Unit Tests', () {
@@ -9,18 +9,32 @@ void main() {
       Medication(
         id: 'med_1',
         name: 'Latanoprost 0.005%',
-        dosage: '1 Drop',
-        frequency: MedFrequency.onceDaily,
+        strength: '0.005%',
         category: MedCategory.eyeDrop,
+        dosageUnit: DosageUnit.drops,
+        dosageAmount: 1,
+        instruction: AdminInstruction.atBedtime,
+        frequency: 'Once daily',
         scheduleTimes: ['21:00'],
+        totalInventoryCount: 30,
+        refillThreshold: 5,
+        colorHex: '#0284C7',
+        iconName: 'eye_drop',
       ),
       Medication(
         id: 'med_2',
         name: 'Metformin 500mg',
-        dosage: '1 Tablet',
-        frequency: MedFrequency.twiceDaily,
-        category: MedCategory.tablet,
+        strength: '500mg',
+        category: MedCategory.oral,
+        dosageUnit: DosageUnit.tablets,
+        dosageAmount: 1,
+        instruction: AdminInstruction.afterMeal,
+        frequency: 'Twice daily',
         scheduleTimes: ['08:00', '20:00'],
+        totalInventoryCount: 60,
+        refillThreshold: 10,
+        colorHex: '#0D9488',
+        iconName: 'pill',
       ),
     ];
 

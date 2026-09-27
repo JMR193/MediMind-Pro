@@ -547,9 +547,7 @@ class _MediBuddyPainter extends CustomPainter {
           ),
           const Radius.circular(8),
         );
-        final capPaint = Paint()
-          ..color = Colors.white
-          ..shadowColor = Colors.black.withAlpha(40);
+        final capPaint = Paint()..color = Colors.white;
         canvas.drawRRect(capRect, capPaint);
 
         // Red cross

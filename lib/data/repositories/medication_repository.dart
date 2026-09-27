@@ -95,15 +95,12 @@ class MedicationRepository extends ChangeNotifier {
     _profiles = _storageService.loadProfiles();
     if (_profiles.isEmpty) {
       final initialProf = _storageService.loadProfile() ??
-          UserProfile(
+          const UserProfile(
             id: 'profile_primary',
-            name: 'Patient (Self)',
+            name: 'Primary Profile',
             relationship: 'Self',
             isPrimaryUser: true,
             colorHex: '#0284C7',
-            primaryDoctorName: 'Dr. Sarah Lin (Ophthalmology)',
-            emergencyContactName: 'Family Member',
-            emergencyContactPhone: '+1-555-0199',
           );
       _profiles = [initialProf];
       _storageService.saveProfiles(_profiles);
@@ -116,36 +113,20 @@ class MedicationRepository extends ChangeNotifier {
     _settings = _storageService.loadSettings();
     _streakData = _storageService.loadStreaks();
 
-    if (_medications.isEmpty) {
-      _seedDefaultMedications();
-    }
     if (_taskerRules.isEmpty) {
       _taskerRules = _taskerService.getDefaultRules();
       _storageService.saveTaskerRules(_taskerRules);
-    }
-    if (_caregivers.isEmpty) {
-      _caregivers = [
-        Caregiver(
-          id: _uuid.v4(),
-          name: 'Elena Rostova',
-          relationship: 'Spouse / Caregiver',
-          phone: '+1-555-0144',
-          email: 'elena.caregiver@example.com',
-          missedDosesBeforeAlert: 2,
-          isActive: true,
-          addedAt: DateTime.now().subtract(const Duration(days: 7)),
-        ),
-      ];
-      _storageService.saveCaregivers(_caregivers);
     }
     _recalculateStreaks();
     notifyListeners();
   }
 
-  void _seedDefaultMedications() {
+  /// Opt-in demo regimen for testing or onboarding preview.
+  /// Not seeded automatically on fresh installs.
+  void seedDemoMedications() {
     _medications = [
       Medication(
-        id: 'default_1',
+        id: 'demo_1',
         name: 'Latanoprost Ophthalmic',
         strength: '0.005%',
         category: MedCategory.eyeDrop,
@@ -160,8 +141,6 @@ class MedicationRepository extends ChangeNotifier {
         afterOpeningDays: 28,
         totalInventoryCount: 22,
         refillThreshold: 7,
-        prescribingDoctor: 'Dr. Sarah Lin (Ophthalmology)',
-        rxNumber: 'RX-99201',
         clinicalNotes: 'Administer 1 drop in Left Eye (OS). Wait 5-10 minutes before applying any secondary eye drop.',
         colorHex: '#0284C7',
         iconName: 'eye_drop',
@@ -172,7 +151,7 @@ class MedicationRepository extends ChangeNotifier {
         contactLensWarning: true,
       ),
       Medication(
-        id: 'default_2',
+        id: 'demo_2',
         name: 'Timolol Maleate',
         strength: '0.5%',
         category: MedCategory.eyeDrop,
@@ -187,8 +166,6 @@ class MedicationRepository extends ChangeNotifier {
         afterOpeningDays: 28,
         totalInventoryCount: 35,
         refillThreshold: 10,
-        prescribingDoctor: 'Dr. Sarah Lin (Ophthalmology)',
-        rxNumber: 'RX-99204',
         clinicalNotes: 'Beta-blocker for intraocular pressure. Maintain 5-10 min gap if administering near other drops.',
         colorHex: '#7C3AED',
         iconName: 'eye_drop',
@@ -199,7 +176,7 @@ class MedicationRepository extends ChangeNotifier {
         contactLensWarning: true,
       ),
       Medication(
-        id: 'default_3',
+        id: 'demo_3',
         name: 'Erythromycin Eye Ointment',
         strength: '0.5%',
         category: MedCategory.eyeOintment,
@@ -214,8 +191,6 @@ class MedicationRepository extends ChangeNotifier {
         afterOpeningDays: 28,
         totalInventoryCount: 15,
         refillThreshold: 5,
-        prescribingDoctor: 'Dr. Sarah Lin (Ophthalmology)',
-        rxNumber: 'RX-99210',
         clinicalNotes: 'Apply thin ribbon inside lower conjunctival sac. ALWAYS apply AFTER liquid eye drops.',
         colorHex: '#0D9488',
         iconName: 'eye_drop',
@@ -227,7 +202,7 @@ class MedicationRepository extends ChangeNotifier {
         isOintment: true,
       ),
       Medication(
-        id: 'default_4',
+        id: 'demo_4',
         name: 'Atorvastatin',
         strength: '20 mg',
         category: MedCategory.oral,
@@ -240,8 +215,6 @@ class MedicationRepository extends ChangeNotifier {
         expiryDate: DateTime.now().add(const Duration(days: 365)),
         totalInventoryCount: 28,
         refillThreshold: 5,
-        prescribingDoctor: 'Dr. Marcus Vance (Cardiology)',
-        rxNumber: 'RX-44102',
         clinicalNotes: 'Lipid-lowering agent. Avoid consuming grapefruit juice while taking this medication.',
         colorHex: '#059669',
         iconName: 'pill',
@@ -249,6 +222,17 @@ class MedicationRepository extends ChangeNotifier {
       ),
     ];
     _storageService.saveMedications(_medications);
+    notifyListeners();
+  }
+
+  /// Clears all medications and cancels their scheduled alarms
+  Future<void> clearAllMedications() async {
+    for (final m in _medications) {
+      await _notificationService.cancelMedicationReminders(m.id);
+    }
+    _medications.clear();
+    await _storageService.saveMedications(_medications);
+    notifyListeners();
   }
 
   // Medication CRUD

@@ -405,6 +405,16 @@ class NotificationService {
     }
   }
 
+  /// Cancels all active and scheduled notifications across all channels
+  Future<void> cancelAllNotifications() async {
+    try {
+      await _notificationsPlugin.cancelAll();
+      debugPrint("Cancelled all scheduled notifications.");
+    } catch (e) {
+      debugPrint("Error cancelling all notifications: $e");
+    }
+  }
+
   /// Emits an In-App notification event directly to foreground listeners
   void showInAppBanner({
     required String title,

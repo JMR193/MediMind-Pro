@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medication_reminder/data/services/drug_food_interaction_ai.dart';
-import 'package:medication_reminder/data/services/pharmacokinetic_simulator.dart';
+import 'package:medimind_app/data/services/drug_food_interaction_ai.dart';
+import 'package:medimind_app/data/services/pharmacokinetic_simulator.dart';
 
 void main() {
   group('DrugFoodInteractionAiService Unit Tests', () {

@@ -6,6 +6,7 @@ import '../../../domain/models/app_settings.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../../core/theme.dart';
 import '../device_integration/device_optimization_screen.dart';
+import '../wearable/wearable_companion_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -63,8 +64,22 @@ class SettingsScreen extends StatelessWidget {
                 _buildSwitchTile(context, 'Adherence Streaks', 'Show streak badges and gamification', Icons.local_fire_department_outlined, settings.showStreaks, (v) => repo.updateSettings(settings.copyWith(showStreaks: v))),
                 _buildSwitchTile(context, 'Caregiver Alerts', 'Notify caregiver on repeated missed doses', Icons.people_outlined, settings.caregiverAlertsEnabled, (v) => repo.updateSettings(settings.copyWith(caregiverAlertsEnabled: v))),
               ]),
+              _buildSection(context, '⌚ Wearable & Smartwatch', [
+                _buildNavigationTile(
+                  context,
+                  'Smartwatch Companion & Simulator',
+                  'Wear OS & Apple Watch live watchface preview, haptics, and sync',
+                  Icons.watch_outlined,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WearableCompanionScreen()),
+                  ),
+                ),
+              ]),
               _buildSection(context, '📦 Data Management', [
                 _buildNavigationTile(context, 'Export Data', 'Save all medication data as JSON backup', Icons.download_outlined, () => _showExportDialog(context)),
+                _buildNavigationTile(context, 'Load Sample Regimen (Demo)', 'Load sample medications to preview features', Icons.science_outlined, () => _showLoadDemoDialog(context, repo)),
+                _buildNavigationTile(context, 'Clear All Medications', 'Remove all medications from active schedule', Icons.medication_liquid_outlined, () => _showClearMedsDialog(context, repo)),
                 _buildNavigationTile(context, 'Clear All Logs', 'Delete all dose history logs', Icons.delete_outline, () => _showClearLogsDialog(context, repo)),
               ]),
               _buildSection(context, 'ℹ️ About', [
@@ -329,6 +344,51 @@ class SettingsScreen extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data export will be available in a future update.')));
             },
             child: const Text('Export'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLoadDemoDialog(BuildContext context, MedicationRepository repo) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.science_outlined, color: Color(0xFF0284C7)),
+        title: const Text('Load Demo Regimen?'),
+        content: const Text('This will populate sample eye drops and oral medications so you can preview alarms, timers, and telemetry charts.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () {
+              repo.seedDemoMedications();
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sample medications loaded.')));
+            },
+            child: const Text('Load Demo'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearMedsDialog(BuildContext context, MedicationRepository repo) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.delete_sweep_outlined, color: MediMindTheme.alertRed),
+        title: const Text('Clear All Medications?'),
+        content: const Text('This will remove all medications from your schedule and cancel active alarms.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: MediMindTheme.alertRed),
+            onPressed: () {
+              repo.clearAllMedications();
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All medications cleared.')));
+            },
+            child: const Text('Clear All'),
           ),
         ],
       ),
