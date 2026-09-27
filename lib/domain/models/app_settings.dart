@@ -27,6 +27,7 @@ class AppSettings {
   final bool dynamicIslandEnabled;
   final bool hapticFeedbackEnabled;
   final bool oemOptimizationPromptDismissed;
+  final bool seniorModeEnabled;
 
   const AppSettings({
     this.themeMode = AppThemeMode.system,
@@ -47,6 +48,7 @@ class AppSettings {
     this.dynamicIslandEnabled = true,
     this.hapticFeedbackEnabled = true,
     this.oemOptimizationPromptDismissed = false,
+    this.seniorModeEnabled = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -68,6 +70,7 @@ class AppSettings {
         'dynamicIslandEnabled': dynamicIslandEnabled,
         'hapticFeedbackEnabled': hapticFeedbackEnabled,
         'oemOptimizationPromptDismissed': oemOptimizationPromptDismissed,
+        'seniorModeEnabled': seniorModeEnabled,
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -95,6 +98,7 @@ class AppSettings {
         hapticFeedbackEnabled: json['hapticFeedbackEnabled'] as bool? ?? true,
         oemOptimizationPromptDismissed:
             json['oemOptimizationPromptDismissed'] as bool? ?? false,
+        seniorModeEnabled: json['seniorModeEnabled'] as bool? ?? false,
       );
 
   AppSettings copyWith({
@@ -116,6 +120,7 @@ class AppSettings {
     bool? dynamicIslandEnabled,
     bool? hapticFeedbackEnabled,
     bool? oemOptimizationPromptDismissed,
+    bool? seniorModeEnabled,
   }) =>
       AppSettings(
         themeMode: themeMode ?? this.themeMode,
@@ -143,6 +148,7 @@ class AppSettings {
             hapticFeedbackEnabled ?? this.hapticFeedbackEnabled,
         oemOptimizationPromptDismissed:
             oemOptimizationPromptDismissed ?? this.oemOptimizationPromptDismissed,
+        seniorModeEnabled: seniorModeEnabled ?? this.seniorModeEnabled,
       );
 }
 

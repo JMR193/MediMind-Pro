@@ -348,6 +348,11 @@ class InteractionService {
     return warnings;
   }
 
+  /// Checks interactions directly across a list of existing medications
+  List<DrugInteractionWarning> checkMedicationInteractions(List<Medication> medications) {
+    return checkInteractions(existingMedications: medications, newDrafts: const []);
+  }
+
   /// Evaluates dietary, food and beverage interactions across all active medications
   List<FoodInteractionWarning> checkFoodInteractions(List<Medication> medications) {
     final List<FoodInteractionWarning> warnings = [];

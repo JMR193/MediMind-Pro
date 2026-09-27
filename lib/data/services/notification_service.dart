@@ -259,6 +259,48 @@ class NotificationService {
     }
   }
 
+  /// Schedules an exact one-off snooze alarm
+  Future<void> scheduleSnoozeAlarm({
+    required Medication med,
+    required int minutes,
+  }) async {
+    try {
+      final scheduledDate = tz.TZDateTime.now(tz.local).add(Duration(minutes: minutes));
+      final snoozeId = med.id.hashCode.abs() + 70000;
+
+      const androidDetails = AndroidNotificationDetails(
+        channelCriticalId,
+        channelCriticalName,
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+        enableVibration: true,
+        category: AndroidNotificationCategory.alarm,
+      );
+
+      const notificationDetails = NotificationDetails(android: androidDetails);
+
+      await _notificationsPlugin.zonedSchedule(
+        id: snoozeId,
+        title: '⏰ SNOOZED: ${med.name}',
+        body: 'Time to take your scheduled dose of ${med.name} (${med.strength}).',
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        payload: med.id,
+      );
+
+      _inAppNotificationStream.add(InAppNotificationEvent(
+        title: 'Alarm Snoozed for $minutes min',
+        message: 'Reminder for ${med.name} will trigger in $minutes minutes.',
+        isCritical: med.isHighPriorityAlarm,
+        timestamp: DateTime.now(),
+      ));
+    } catch (e) {
+      debugPrint('Error scheduling snooze alarm: $e');
+    }
+  }
+
   /// Schedules a 60-Second Punctal Occlusion Alarm (Works when app is closed)
   Future<void> schedulePunctalOcclusionTimer({int seconds = 60}) async {
     try {

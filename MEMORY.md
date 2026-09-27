@@ -82,3 +82,25 @@
 5. **Foreground In-App Alert System (`InAppNotificationOverlay`)**:
    - Sliding glass overlay for real-time notification broadcast when app is active.
    - Dedicated ophthalmic drop spacing countdown alerts and punctal occlusion guidance.
+
+### F. MediLink Connected Healthcare & Dual-Mode System (Behance Case Study 255958521)
+1. **Dual-Mode Operational Paradigm**:
+   - **User Mode (Patient)**: Calm Blue (`#4A90E2` / Soft Blue `#CDE1FF`), focused on intuitive medication intake, visual schedule calendar, alarms, and emergency actions.
+   - **Guardian Mode (Caregiver)**: Emerald Green (`#36A25D` / Soft Mint `#B2E6C1`), focused on remote monitoring, live adherence gauges, remote schedule management, and pharmacy replenishment.
+2. **SOS Emergency Command Screen (`SosEmergencyScreen`)**:
+   - 1-tap SOS trigger with 5s cancellable countdown to prevent false alarms.
+   - Automated live GPS location dispatch and emergency contact notification.
+   - Audible distress siren alarm toggle to alert nearby individuals in physical emergencies.
+   - Speed-dial integration for local emergency dispatch (911/112) and primary caregivers.
+3. **Stock-Out Alert & Refill Hub (`StockOutAlertScreen`)**:
+   - Dedicated inventory crisis screen highlighting depleted and near-empty medications.
+   - Automated 1-tap SMS & phone call dispatch with pre-filled replenishment requests to guardians.
+   - High-density QR code prescription transmission for pharmacy counter presentation.
+4. **Heads-Up Medication Alarm Dialog (`MedicineAlarmDialog`)**:
+   - Animated ringing bell with clear high-contrast dosage and administration instructions.
+   - Large tactile actions: `✓ Taken`, `⏰ Snooze 10 Min`, and `✕ Skip` (with skip-reason clinical tracking).
+5. **Guardian Mode & Doorstep Pharmacy Delivery Hub (`GuardianDashboardScreen`)**:
+   - Live patient adherence circular gauge with today's intake breakdown.
+   - Remote medication schedule management and low-inventory reordering.
+   - Integrated doorstep delivery hub supporting partner pharmacies (Apollo Pharmacy, Netmeds, Tata 1mg, MedPlus).
+   - 20% savings badge and live 4-stage order tracker (`Order Placed -> Packed -> Out for Delivery -> Delivered`).

@@ -27,7 +27,7 @@ class _QrCodeShareScreenState extends State<QrCodeShareScreen>
 
   // Import state
   List<Medication>? _parsedImportMeds;
-  List<DrugInteraction>? _detectedImportInteractions;
+  List<DrugInteractionWarning>? _detectedImportInteractions;
   String? _importError;
 
   @override
@@ -93,10 +93,10 @@ class _QrCodeShareScreenState extends State<QrCodeShareScreen>
   }
 
   void _shareViaText(String payload) {
-    SharePlus.share(
-      payload,
+    SharePlus.instance.share(ShareParams(
+      text: payload,
       subject: 'My MediMind Medication Regimen & Schedule',
-    );
+    ));
   }
 
   void _parseImportData(String rawJson, MedicationRepository repo) {
@@ -172,7 +172,7 @@ class _QrCodeShareScreenState extends State<QrCodeShareScreen>
       // Check for Drug-Drug Interactions with existing active medications
       final interactionService = InteractionService();
       final allMedsCombined = [...repo.activeMedications, ...parsed];
-      final interactions = interactionService.checkInteractions(allMedsCombined);
+      final interactions = interactionService.checkMedicationInteractions(allMedsCombined);
 
       setState(() {
         _parsedImportMeds = parsed;
@@ -446,7 +446,7 @@ class _QrCodeShareScreenState extends State<QrCodeShareScreen>
                   const SizedBox(height: 8),
                   ..._detectedImportInteractions!.map(
                     (i) => Text(
-                      '• ${i.drug1} + ${i.drug2}: ${i.description}',
+                      '• ${i.drugA} + ${i.drugB}: ${i.description}',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                     ),
                   ),

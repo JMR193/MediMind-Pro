@@ -353,6 +353,12 @@ class MedicationRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Snoozes a dose for a given number of minutes
+  Future<void> snoozeDose(Medication medication, int minutes) async {
+    await _notificationService.scheduleSnoozeAlarm(med: medication, minutes: minutes);
+    notifyListeners();
+  }
+
   // Batch Taking for Digital 4-Slot Pillbox
   Future<void> takeAllSlotDoses(String slotName, {DateTime? date}) async {
     List<Medication> targetMeds = [];

@@ -190,6 +190,8 @@ class Medication {
     return (afterOpeningDays! - elapsed).clamp(0, 999);
   }
 
+  int? get daysRemainingAfterOpening => openedDaysRemaining;
+
   /// Determines whether this medication is scheduled to be taken on a specific calendar date
   bool isScheduledForDay(DateTime date) {
     // 1. Date boundaries check
