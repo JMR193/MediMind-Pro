@@ -13,6 +13,7 @@ import '../../core/theme.dart';
 import '../eye_drop_assistant/eye_drop_screen.dart';
 import '../symptom_diary/symptom_diary_screen.dart';
 import '../medication_wizard/add_medication_screen.dart';
+import 'chart_assistant_view.dart';
 
 class AiAssistantScreen extends StatefulWidget {
   const AiAssistantScreen({super.key});
@@ -32,6 +33,8 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
   bool _speechInitialized = false;
 
   static const _quickQuestions = [
+    '📊 Show my adherence chart & forecast',
+    '⏱️ Analyze my circadian timing jitter',
     '👨‍🏫 Explain glaucoma like I am 5',
     '💧 Why wait 5 minutes between drops?',
     '⏳ Why discard drops after 28 days?',
@@ -63,7 +66,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _initSpeech();
   }
 
@@ -224,6 +227,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
               indicatorColor: Theme.of(context).colorScheme.primary,
               tabs: const [
                 Tab(icon: Icon(Icons.chat_bubble_outline, size: 18), text: 'AI Tutor'),
+                Tab(icon: Icon(Icons.insert_chart_outlined_rounded, size: 18), text: 'Chart Assistant'),
                 Tab(icon: Icon(Icons.checklist_outlined, size: 18), text: 'Daily Tasks'),
                 Tab(icon: Icon(Icons.school_outlined, size: 18), text: 'Academy'),
                 Tab(icon: Icon(Icons.health_and_safety_outlined, size: 18), text: 'Check-In'),
@@ -234,6 +238,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
             controller: _tabController,
             children: [
               _buildChatTab(service),
+              _buildChartAssistantTab(service),
               _buildDailyTasksTab(service),
               _buildAcademyTab(service),
               _buildCheckInTab(service),
@@ -241,6 +246,12 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
           ),
         );
       },
+    );
+  }
+
+  Widget _buildChartAssistantTab(AiAssistantService service) {
+    return ChartAssistantView(
+      repository: context.read<MedicationRepository>(),
     );
   }
 

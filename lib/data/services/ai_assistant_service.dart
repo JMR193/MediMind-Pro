@@ -1065,10 +1065,21 @@ Instead of normal levels, drug concentrations in your blood can rise **up to 15-
           "**Recommendation:** Avoid grapefruit completely. Oranges and lemons are safe!";
     }
 
+    if (_matchesAny(q, ['chart', 'adherence chart', 'forecast', 'trend', 'telemetry', 'graph', 'jitter', 'analytics'])) {
+      return "📊 **AI Clinical Chart Assistant:**\n\n"
+          "I actively monitor and analyze your medication intake telemetry using linear regression and circadian drift models!\n\n"
+          "• **📈 Adherence Trend**: Daily compliance curve with WHO 80% benchmark target lines.\n"
+          "• **📊 Intake Comparison**: Grouped bar rods comparing scheduled vs taken doses.\n"
+          "• **🍩 Time Distribution**: Pie breakdown across Morning, Midday, Evening, and Bedtime windows.\n"
+          "• **⏱️ Timing Jitter**: Circadian drift variance standard deviation.\n\n"
+          "👉 Switch to the **Chart Assistant tab** at the top of this screen to interact with your live interactive graphs and 7-day predictive forecast!";
+    }
+
     return "🤖 **I'm your MediMind AI Health Coach & Medical Tutor!**\n\n"
         "I speak and understand **multiple languages** (English, Spanish, Arabic, French, German, Hindi, Chinese).\n"
         "• Ask me to **'Explain glaucoma in simple words'**\n"
         "• Ask me **'Why do I need to wait 5 minutes between drops?'**\n"
+        "• Ask me to **'Show my adherence chart & forecast'**\n"
         "• Ask me in Spanish: **'¿Cómo me pongo las gotas?'**\n"
         "• Ask me in Arabic: **'كيف استعمل قطرة العين؟'**\n\n"
         "Tap the speaker icon on any message to hear it read out loud in your language!";

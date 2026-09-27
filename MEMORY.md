@@ -162,4 +162,21 @@
    - `FoodInteractionRadarCard`: Search bar with quick food query chips (`🍊 Grapefruit`, `🥛 Milk`, `🥬 Spinach`, etc.) and severity classification badges (`CONTRAINDICATED`, `MAJOR RISK`, `MODERATE`).
    - Complete unit test coverage in `test/drug_food_and_pk_test.dart` and `test/clinical_ai_and_chrono_test.dart`.
 
+### J. AI Clinical Chart Assistant & Telemetry Intelligence Suite
+1. **Clinical Chart Telemetry Engine (`ClinicalChartAssistantService`)**:
+   - Computes empirical daily adherence points, moving averages, and linear regression trajectories ($y = mx + b$).
+   - Generates 7-day future adherence forecasts with bounded slope limits.
+   - Calculates time-of-day intake distribution (Morning, Midday, Evening, Bedtime) and identifies vulnerable drop-off windows.
+   - Computes Circadian Timing Jitter ($\pm$ SD drift in minutes from scheduled times).
+   - Conversational Chart Telemetry Q&A answering forecast, jitter, risk, and doctor digest queries.
+2. **Interactive Chart Assistant Suite (`ChartAssistantView`)**:
+   - `fl_chart` powered multimodal visualizations:
+     - 📈 **Line Trend Chart**: Daily adherence curve with WHO 80% benchmark target lines and gradient area fills.
+     - 📊 **Intake Comparison Bar Chart**: Dual-rod comparisons of taken vs scheduled doses.
+     - 🍩 **Time Distribution Donut Pie Chart**: Morning, Midday, Evening, and Bedtime intake breakdowns.
+   - 4-metric telemetry overview (Overall Adherence, 7D Forecast, Timing Jitter, Intake Breakdown).
+   - 1-tap quick inquiry chips (`📈 Forecast Next Week`, `⏱️ Circadian Timing Jitter`, `⚠️ Highest-Risk Window`, `📋 Doctor Telemetry Digest`).
+   - Integrated as a prominent dedicated tab in `AiAssistantScreen`.
+
+
 
