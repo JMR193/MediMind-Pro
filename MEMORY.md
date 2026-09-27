@@ -130,3 +130,20 @@
    - Integrated 60-second punctal occlusion guidance.
 6. **3D Visual Studio & Pip Laboratory (`VisualLabScreen`)**:
    - 3-tab interactive laboratory combining the 3D Pill Inspector, MediBuddy Studio, and Fluid & Eye Drop Simulators.
+
+### H. Pre-Configured Clinical AI & Behavioral Machine Learning Suite (Neuro-Symbolic)
+1. **Chronotherapy Circadian Alignment Engine (`ClinicalExpertAiService`)**:
+   - Grounded in circadian chronobiology for statins (bedtime lipogenesis peak), PPIs (morning acid pump stimulation), glaucoma prostaglandins (bedtime IOP surge mitigation), corticosteroids (morning cortisol synchrony), and antihypertensives (non-dipper nocturnal conversion).
+   - Generates patient Circadian Synchronization Score and provides 1-tap regimen realignment.
+2. **Pharmacokinetic Half-Interval Rescue Calculator**:
+   - Evaluates whether a missed dose can be safely taken based on $T_{\text{elapsed}} / T_{\text{interval}} \le 0.50$.
+   - Strict clinical override windows: DOACs/Warfarin (6h strict max limit), Glaucoma drops (3h limit), Levothyroxine (fasting override).
+3. **Medical Prescription Latin 'Sig' Shorthand NLP Decrypter**:
+   - Instant deterministic decryption of doctor shorthand (`PO TID PC`, `1 GTT OS QHS`, `2 PUFF Q4H PRN`) into structured dosage amounts, units, frequencies, and scheduled times.
+4. **Behavioral Machine Learning Engine (`BehavioralMlEngine`)**:
+   - **Adherence Risk Forecaster**: Statistical model identifying high drop-off days (e.g., weekends) and vulnerable times of day.
+   - **Adaptive Circadian Timing Learner**: Analyzes mean drift ($\Delta t$) and standard deviation ($\sigma$) to recommend alarm window shifts matching actual patient routines.
+   - **Cognitive Latency Drift & Anomaly Detector**: Exponential Moving Average (EMA) and Z-score tracking of response latency to alert caregivers of early cognitive decline or regimen burnout.
+5. **Smart Chronotherapy & AI Advisor Screen (`SmartChronotherapyAdvisorScreen`)**:
+   - 3-tab clinical intelligence suite: Circadian Chronogram & Regimen Optimizer, Behavioral ML Radar, and Latin Sig Decrypter Playground.
+

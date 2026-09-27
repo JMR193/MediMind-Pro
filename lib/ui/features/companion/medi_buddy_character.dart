@@ -64,6 +64,10 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
     'Don’t forget to drink a glass of fresh water with your meds!',
     'I’m right here with you! Every dose counts!',
     'Great job taking care of yourself!',
+    'Tip from Pip: Taking statins at bedtime optimizes cholesterol reduction while you sleep!',
+    'Tip from Pip: Space eye drops 5 to 10 minutes apart to prevent medication washout!',
+    'Tip from Pip: Gentle 60-second tear-duct pressure keeps eye drops working right where you need them!',
+    'Tip from Pip: Take thyroid and stomach medicine on an empty stomach for maximum absorption!',
   ];
 
   @override

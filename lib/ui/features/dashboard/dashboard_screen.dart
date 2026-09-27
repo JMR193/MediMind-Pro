@@ -41,6 +41,7 @@ import '../alarm/medicine_alarm_dialog.dart';
 import '../guardian_mode/guardian_dashboard_screen.dart';
 import '../companion/companion_card_widget.dart';
 import '../visuals_3d/visual_lab_screen.dart';
+import '../ai_advisor/smart_chronotherapy_advisor_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -724,9 +725,17 @@ class DashboardScreen extends StatelessWidget {
             _buildToolButton(
               context,
               icon: Icons.view_in_ar_rounded,
-              label: '3D Pill Lab',
+              label: '3D Lab',
               color: const Color(0xFF7C3AED),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.auto_awesome_rounded,
+              label: 'Chrono AI',
+              color: const Color(0xFF0D9488),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SmartChronotherapyAdvisorScreen())),
             ),
             const SizedBox(width: 8),
             _buildToolButton(
@@ -740,7 +749,7 @@ class DashboardScreen extends StatelessWidget {
             _buildToolButton(
               context,
               icon: Icons.face_rounded,
-              label: 'Pip Avatar',
+              label: 'Pip Mascot',
               color: const Color(0xFFEC4899),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
             ),
@@ -749,7 +758,7 @@ class DashboardScreen extends StatelessWidget {
               context,
               icon: Icons.remove_red_eye_rounded,
               label: 'Drop 3D',
-              color: const Color(0xFF0D9488),
+              color: const Color(0xFF059669),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
             ),
           ],
