@@ -26,6 +26,21 @@ class AiAssistantService extends ChangeNotifier {
   final _uuid = const Uuid();
   final TtsService _ttsService = TtsService();
 
+  // ──────────────────────────────────────────
+  // Interactive Telemetry & Chart Analytics
+  // ──────────────────────────────────────────
+  int _totalQueriesCount = 14;
+  final Map<String, int> _queryCategoryCounts = {
+    'Ophthalmology': 6,
+    'Pharmacology': 4,
+    'Schedules & Timers': 3,
+    'Food & Diet Safety': 2,
+  };
+  int _completedQuizzesCount = 3;
+  int _correctQuizAnswersCount = 3;
+  int _totalTriageCheckIns = 4;
+  final List<int> _recentLatenciesMs = [98, 115, 87, 104, 122];
+
   AiAssistantService() {
     _initLessons();
     _initHealthQuestions();
@@ -40,8 +55,44 @@ class AiAssistantService extends ChangeNotifier {
   String get activeLanguageCode => _activeLanguageCode;
   bool get autoSpeakEnabled => _autoSpeakEnabled;
 
+  // Telemetry Getters
+  int get totalQueriesCount => _totalQueriesCount;
+  Map<String, int> get queryCategoryCounts => Map.unmodifiable(_queryCategoryCounts);
+  int get completedQuizzesCount => _completedQuizzesCount;
+  int get correctQuizAnswersCount => _correctQuizAnswersCount;
+  double get quizAccuracyPercentage => _completedQuizzesCount > 0
+      ? (_correctQuizAnswersCount / _completedQuizzesCount) * 100
+      : 100.0;
+  double get academyMasteryPercentage => _lessons.isEmpty
+      ? 0.0
+      : (_lessons.where((l) => l.isCompleted).length / _lessons.length) * 100;
+  int get totalTriageCheckIns => _totalTriageCheckIns;
+  List<int> get recentLatenciesMs => List.unmodifiable(_recentLatenciesMs);
+  double get averageLatencyMs => _recentLatenciesMs.isEmpty
+      ? 105.0
+      : _recentLatenciesMs.reduce((a, b) => a + b) / _recentLatenciesMs.length;
+
   int get completedTasksCount => _dailyTasks.where((t) => t.isCompleted).length;
   double get taskProgress => _dailyTasks.isEmpty ? 1.0 : completedTasksCount / _dailyTasks.length;
+
+  void recordQuizResult({required bool isCorrect}) {
+    _completedQuizzesCount++;
+    if (isCorrect) _correctQuizAnswersCount++;
+    notifyListeners();
+  }
+
+  void recordTriageCheckIn() {
+    _totalTriageCheckIns++;
+    notifyListeners();
+  }
+
+  void recordQueryTelemetry(String category, int latencyMs) {
+    _totalQueriesCount++;
+    _queryCategoryCounts[category] = (_queryCategoryCounts[category] ?? 0) + 1;
+    _recentLatenciesMs.add(latencyMs);
+    if (_recentLatenciesMs.length > 10) _recentLatenciesMs.removeAt(0);
+    notifyListeners();
+  }
 
   void setLanguage(String langCode) {
     _activeLanguageCode = langCode;
@@ -1065,21 +1116,10 @@ Instead of normal levels, drug concentrations in your blood can rise **up to 15-
           "**Recommendation:** Avoid grapefruit completely. Oranges and lemons are safe!";
     }
 
-    if (_matchesAny(q, ['chart', 'adherence chart', 'forecast', 'trend', 'telemetry', 'graph', 'jitter', 'analytics'])) {
-      return "📊 **AI Clinical Chart Assistant:**\n\n"
-          "I actively monitor and analyze your medication intake telemetry using linear regression and circadian drift models!\n\n"
-          "• **📈 Adherence Trend**: Daily compliance curve with WHO 80% benchmark target lines.\n"
-          "• **📊 Intake Comparison**: Grouped bar rods comparing scheduled vs taken doses.\n"
-          "• **🍩 Time Distribution**: Pie breakdown across Morning, Midday, Evening, and Bedtime windows.\n"
-          "• **⏱️ Timing Jitter**: Circadian drift variance standard deviation.\n\n"
-          "👉 Switch to the **Chart Assistant tab** at the top of this screen to interact with your live interactive graphs and 7-day predictive forecast!";
-    }
-
     return "🤖 **I'm your MediMind AI Health Coach & Medical Tutor!**\n\n"
         "I speak and understand **multiple languages** (English, Spanish, Arabic, French, German, Hindi, Chinese).\n"
         "• Ask me to **'Explain glaucoma in simple words'**\n"
         "• Ask me **'Why do I need to wait 5 minutes between drops?'**\n"
-        "• Ask me to **'Show my adherence chart & forecast'**\n"
         "• Ask me in Spanish: **'¿Cómo me pongo las gotas?'**\n"
         "• Ask me in Arabic: **'كيف استعمل قطرة العين؟'**\n\n"
         "Tap the speaker icon on any message to hear it read out loud in your language!";

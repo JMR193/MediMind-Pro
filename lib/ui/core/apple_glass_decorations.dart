@@ -80,6 +80,30 @@ class AppleGlassDecorations {
     );
   }
 
+  /// Frosted glass box decoration for custom container styling
+  static BoxDecoration frostedGlassBox({
+    Color color = Colors.white,
+    double opacity = 0.85,
+    double borderRadius = 18.0,
+    Color? borderColor,
+  }) {
+    return BoxDecoration(
+      color: color.withAlpha((opacity.clamp(0.0, 1.0) * 255).round()),
+      borderRadius: BorderRadius.circular(borderRadius),
+      border: Border.all(
+        color: borderColor ?? Colors.white.withAlpha(80),
+        width: 1.2,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(12),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
   /// Sleek iOS 18 pill button with frosted blur and spring scale
   static Widget glassPillButton({
     required BuildContext context,

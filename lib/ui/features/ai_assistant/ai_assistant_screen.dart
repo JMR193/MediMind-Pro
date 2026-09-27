@@ -1,18 +1,23 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:uuid/uuid.dart';
 import '../../../data/services/ai_assistant_service.dart';
 import '../../../data/services/prescription_parser_service.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/ai_message.dart';
 import '../../../domain/models/ai_task.dart';
 import '../../../domain/models/medication.dart';
+import '../../../domain/models/symptom_log.dart';
 import '../../core/theme.dart';
+import '../../core/apple_glass_decorations.dart';
 import '../eye_drop_assistant/eye_drop_screen.dart';
 import '../symptom_diary/symptom_diary_screen.dart';
 import '../medication_wizard/add_medication_screen.dart';
+import 'ai_telemetry_analytics_view.dart';
 import 'chart_assistant_view.dart';
 
 class AiAssistantScreen extends StatefulWidget {
@@ -32,9 +37,25 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
   bool _isListening = false;
   bool _speechInitialized = false;
 
+  // Interactive 60s Punctal Occlusion Timer State
+  Timer? _punctalTimer;
+  int _punctalSeconds = 60;
+  bool _isPunctalRunning = false;
+
+  // Interactive Academy Mode State
+  String _academyMode = 'lessons'; // 'lessons' | 'flashcards'
+  int _currentCardIndex = 0;
+  bool _isCardFlipped = false;
+
+  // Clinical Symptom Triage State
+  double _triageSeverity = 2.0;
+  String _triageEye = 'Both';
+  bool _triageSavedToDiary = false;
+
+  // Telemetry SubTab State (0: Pharmacological Charts, 1: AI Telemetry & Quiz Mastery)
+  int _telemetrySubTab = 0;
+
   static const _quickQuestions = [
-    '📊 Show my adherence chart & forecast',
-    '⏱️ Analyze my circadian timing jitter',
     '👨‍🏫 Explain glaucoma like I am 5',
     '💧 Why wait 5 minutes between drops?',
     '⏳ Why discard drops after 28 days?',
@@ -121,11 +142,62 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
 
   @override
   void dispose() {
+    _punctalTimer?.cancel();
     _speech.stop();
     _tabController.dispose();
     _chatController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _startPunctalTimer(AiAssistantService service) {
+    if (_isPunctalRunning) {
+      _punctalTimer?.cancel();
+      setState(() {
+        _isPunctalRunning = false;
+        _punctalSeconds = 60;
+      });
+      return;
+    }
+
+    AppleGlassDecorations.heavyHaptic();
+    setState(() {
+      _isPunctalRunning = true;
+      _punctalSeconds = 60;
+    });
+
+    _punctalTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_punctalSeconds > 1) {
+        setState(() => _punctalSeconds--);
+        if (_punctalSeconds % 10 == 0) {
+          AppleGlassDecorations.lightHaptic();
+        }
+      } else {
+        timer.cancel();
+        AppleGlassDecorations.heavyHaptic();
+        setState(() {
+          _isPunctalRunning = false;
+          _punctalSeconds = 60;
+        });
+        // Auto-check off punctal task if present
+        for (final t in service.dailyTasks) {
+          if (t.id.contains('eye') && !t.isCompleted) {
+            service.toggleTask(t.id);
+            break;
+          }
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ 60s Punctal Occlusion Completed! Cornea absorbed; systemic absorption blocked.'),
+            backgroundColor: Color(0xFF0D9488),
+          ),
+        );
+      }
+    });
   }
 
   void _send(String text) {
@@ -227,7 +299,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
               indicatorColor: Theme.of(context).colorScheme.primary,
               tabs: const [
                 Tab(icon: Icon(Icons.chat_bubble_outline, size: 18), text: 'AI Tutor'),
-                Tab(icon: Icon(Icons.insert_chart_outlined_rounded, size: 18), text: 'Chart Assistant'),
+                Tab(icon: Icon(Icons.analytics_outlined, size: 18), text: 'Telemetry'),
                 Tab(icon: Icon(Icons.checklist_outlined, size: 18), text: 'Daily Tasks'),
                 Tab(icon: Icon(Icons.school_outlined, size: 18), text: 'Academy'),
                 Tab(icon: Icon(Icons.health_and_safety_outlined, size: 18), text: 'Check-In'),
@@ -238,7 +310,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
             controller: _tabController,
             children: [
               _buildChatTab(service),
-              _buildChartAssistantTab(service),
+              _buildTelemetryTab(service),
               _buildDailyTasksTab(service),
               _buildAcademyTab(service),
               _buildCheckInTab(service),
@@ -249,14 +321,110 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
     );
   }
 
-  Widget _buildChartAssistantTab(AiAssistantService service) {
-    return ChartAssistantView(
-      repository: context.read<MedicationRepository>(),
-    );
-  }
-
   String _getLangName(String code) {
     return _languageOptions.firstWhere((l) => l.$1 == code, orElse: () => ('en', 'English')).$2;
+  }
+
+  // ──────────────────────────────────────────
+  // Tab 2: Interactive Telemetry & Chart Analytics
+  // ──────────────────────────────────────────
+  Widget _buildTelemetryTab(AiAssistantService service) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Theme.of(context).dividerColor.withAlpha(60)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _telemetrySubTab = 0);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _telemetrySubTab == 0
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.insights,
+                          size: 16,
+                          color: _telemetrySubTab == 0 ? Colors.white : Colors.grey,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Timing Charts',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _telemetrySubTab == 0 ? Colors.white : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    setState(() => _telemetrySubTab = 1);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _telemetrySubTab == 1
+                          ? const Color(0xFF7C3AED)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.psychology,
+                          size: 16,
+                          color: _telemetrySubTab == 1 ? Colors.white : Colors.grey,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'AI Telemetry',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _telemetrySubTab == 1 ? Colors.white : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: _telemetrySubTab == 0
+              ? ChartAssistantView(repository: context.read<MedicationRepository>())
+              : const AiTelemetryAnalyticsView(),
+        ),
+      ],
+    );
   }
 
   // ──────────────────────────────────────────
@@ -563,6 +731,75 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
           ),
         ),
         const SizedBox(height: 16),
+
+        // Interactive In-Place 60s Punctal Occlusion Coach
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: AppleGlassDecorations.frostedGlassBox(
+            color: Colors.white,
+            opacity: 0.9,
+            borderRadius: 18,
+            borderColor: const Color(0xFF0D9488).withAlpha(50),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D9488).withAlpha(25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.compress_rounded, color: Color(0xFF0D9488), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('60s Punctal Occlusion Assistant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('Pinch tear duct to block systemic absorption', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '$_punctalSeconds s',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: _isPunctalRunning ? const Color(0xFF0D9488) : Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: (60 - _punctalSeconds) / 60.0,
+                  minHeight: 6,
+                  backgroundColor: const Color(0xFF0D9488).withAlpha(25),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D9488)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                onPressed: () => _startPunctalTimer(service),
+                icon: Icon(_isPunctalRunning ? Icons.stop_circle_outlined : Icons.play_circle_fill_rounded, size: 18),
+                label: Text(_isPunctalRunning ? 'Pinching Duct... (Tap to Cancel)' : 'Start 60-Second Occlusion Timer'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 42),
+                  backgroundColor: _isPunctalRunning ? const Color(0xFFEA580C) : const Color(0xFF0D9488),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
         const Text('Automated Daily Checklist', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
         const SizedBox(height: 8),
         if (tasks.isEmpty)
@@ -638,7 +875,49 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
   }
 
   // ──────────────────────────────────────────
-  // Tab 3: Medical Academy (Tutor Lessons)
+  // Clinical Flashcards Knowledge Base
+  // ──────────────────────────────────────────
+  static const _clinicalFlashcards = [
+    (
+      title: 'Punctal Occlusion Mechanism',
+      category: 'Ocular Pharmacology',
+      front: 'Why must you press the inner corner of your eye next to your nose bridge for 60 seconds when instilling drops?',
+      back: 'To physically occlude the nasolacrimal punctum! This stops potent eye drops (like Timolol beta-blockers) from draining into your nasal mucosa and systemic bloodstream, preventing severe bradycardia, bronchospasms, and hypotension.',
+    ),
+    (
+      title: 'The 5-Minute Spacing Rule',
+      category: 'Pharmacokinetics',
+      front: 'What happens if you administer two different ophthalmic eye drops immediately back-to-back?',
+      back: 'The human conjunctival sac holds only 25–30 µL, while a standard commercial drop is 40–50 µL. Applying a second drop immediately flushes out up to 80% of the first drug! Always space different drops by at least 5–10 minutes.',
+    ),
+    (
+      title: 'The 28-Day Bottle Expiry Rule',
+      category: 'Clinical Safety',
+      front: 'Why should prescription eye drop bottles be discarded 28 days after first opening?',
+      back: 'Antimicrobial preservatives (such as Benzalkonium Chloride) degrade after exposure to oxygen. Repeated tip exposure introduces airborne pathogens, greatly elevating the risk of severe bacterial keratitis and corneal ulcers.',
+    ),
+    (
+      title: 'Formulation Viscosity Sequence',
+      category: 'Formulation Hierarchy',
+      front: 'In what exact sequence should multiple eye medications be instilled?',
+      back: 'Solutions (watery) FIRST → Suspensions (shake well) → Emulsions → Gels → Ointments (thick petrolatum) LAST. Applying an ointment first creates an impermeable hydrophobic barrier preventing liquid drops from penetrating.',
+    ),
+    (
+      title: 'Grapefruit & Statin Toxicity',
+      category: 'Drug-Food Interactions',
+      front: 'Why is Grapefruit juice strictly avoided with Atorvastatin, Simvastatin, and Lovastatin?',
+      back: 'Grapefruit furanocoumarins irreversibly inhibit intestinal CYP3A4 enterocytes. This spikes statin bioavailability up to 12-fold, dramatically raising rhabdomyolysis and acute renal failure risks.',
+    ),
+    (
+      title: 'Glaucoma Diurnal Chronotherapy',
+      category: 'Chronobiology',
+      front: 'Why are Prostaglandin analogs (Latanoprost, Travoprost) dosed specifically at bedtime (QHS)?',
+      back: 'Intraocular pressure (IOP) peaks in early morning hours (04:00–07:00 AM) due to supine posture. Evening dosing aligns with peak uveoscleral outflow during this vulnerable axonal window, while allowing transient hyperemic redness to clear overnight.',
+    ),
+  ];
+
+  // ──────────────────────────────────────────
+  // Tab 4: Medical Academy (Tutor Lessons & Flashcards)
   // ──────────────────────────────────────────
   Widget _buildAcademyTab(AiAssistantService service) {
     final lessons = service.lessons;
@@ -661,7 +940,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
                   children: [
                     Text('MediMind Patient Academy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                     SizedBox(height: 2),
-                    Text('1-minute clinical masterclasses to understand your eye care, avoid complications & master your health.', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text('Clinical micro-courses and high-yield flashcards to master your eye care & avoid drug complications.', style: TextStyle(color: Colors.white70, fontSize: 11)),
                   ],
                 ),
               ),
@@ -669,9 +948,216 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
           ),
         ),
         const SizedBox(height: 16),
-        const Text('Clinical Micro-Courses', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-        const SizedBox(height: 8),
-        ...lessons.map((l) => _buildLessonCard(context, l, service)),
+
+        // Mode Selector: Clinical Courses vs Flashcards
+        Row(
+          children: [
+            Expanded(
+              child: ChoiceChip(
+                label: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.auto_stories_rounded, size: 14),
+                    SizedBox(width: 6),
+                    Text('Micro-Courses (6)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                selected: _academyMode == 'lessons',
+                selectedColor: const Color(0xFF7C3AED),
+                labelStyle: TextStyle(color: _academyMode == 'lessons' ? Colors.white : Colors.black87),
+                onSelected: (val) {
+                  if (val) {
+                    AppleGlassDecorations.lightHaptic();
+                    setState(() => _academyMode = 'lessons');
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ChoiceChip(
+                label: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.style_rounded, size: 14),
+                    SizedBox(width: 6),
+                    Text('Flashcards (6)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                selected: _academyMode == 'flashcards',
+                selectedColor: const Color(0xFF7C3AED),
+                labelStyle: TextStyle(color: _academyMode == 'flashcards' ? Colors.white : Colors.black87),
+                onSelected: (val) {
+                  if (val) {
+                    AppleGlassDecorations.lightHaptic();
+                    setState(() => _academyMode = 'flashcards');
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        if (_academyMode == 'flashcards')
+          _buildFlashcardsView()
+        else ...[
+          const Text('Clinical Micro-Courses', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const SizedBox(height: 8),
+          ...lessons.map((l) => _buildLessonCard(context, l, service)),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildFlashcardsView() {
+    final card = _clinicalFlashcards[_currentCardIndex];
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Card ${_currentCardIndex + 1} of ${_clinicalFlashcards.length}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF7C3AED)),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7C3AED).withAlpha(20),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                card.category,
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Interactive Flip Card
+        GestureDetector(
+          onTap: () {
+            AppleGlassDecorations.mediumHaptic();
+            setState(() => _isCardFlipped = !_isCardFlipped);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 220),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: _isCardFlipped
+                    ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
+                    : [Colors.white, const Color(0xFFF8FAFC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: _isCardFlipped ? const Color(0xFF38BDF8) : const Color(0xFF7C3AED).withAlpha(60),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      _isCardFlipped ? Icons.lightbulb_rounded : Icons.help_outline_rounded,
+                      color: _isCardFlipped ? const Color(0xFF38BDF8) : const Color(0xFF7C3AED),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _isCardFlipped ? 'CLINICAL PEARL & MECHANISM' : 'CLINICAL QUESTION',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                        color: _isCardFlipped ? const Color(0xFF38BDF8) : const Color(0xFF7C3AED),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _isCardFlipped ? card.back : card.front,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.45,
+                    fontWeight: _isCardFlipped ? FontWeight.normal : FontWeight.w600,
+                    color: _isCardFlipped ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      _isCardFlipped ? 'Tap to see question 🔄' : 'Tap to reveal clinical mechanism 💡',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: _isCardFlipped ? Colors.white60 : Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Flashcard Navigation Controls
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _currentCardIndex > 0
+                    ? () {
+                        AppleGlassDecorations.lightHaptic();
+                        setState(() {
+                          _currentCardIndex--;
+                          _isCardFlipped = false;
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.arrow_back_rounded, size: 16),
+                label: const Text('Previous'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _currentCardIndex < _clinicalFlashcards.length - 1
+                    ? () {
+                        AppleGlassDecorations.lightHaptic();
+                        setState(() {
+                          _currentCardIndex++;
+                          _isCardFlipped = false;
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                label: const Text('Next Card'),
+                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF7C3AED)),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -839,6 +1325,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
                               : () {
                                   setModalState(() => submitted = true);
                                   service.completeLesson(lesson.id);
+                                  service.recordQuizResult(isCorrect: selectedOption == lesson.correctOptionIndex);
                                 },
                           style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
                           child: const Text('Submit Answer'),
@@ -865,10 +1352,11 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
   }
 
   // ──────────────────────────────────────────
-  // Tab 4: Health Check-In (Targeted Questioning)
+  // Tab 5: Health Check-In & Clinical Symptom Triage
   // ──────────────────────────────────────────
   Widget _buildCheckInTab(AiAssistantService service) {
     final questions = service.healthQuestions;
+    final isRedFlag = _triageSeverity >= 7.0;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -887,9 +1375,9 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Daily AI Health Triage', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text('Clinical Symptom Triage & Check-In', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                     SizedBox(height: 2),
-                    Text('Answer 3 quick questions to help AI evaluate your treatment tolerance and flag issues early.', style: TextStyle(color: Colors.white70, fontSize: 11)),
+                    Text('Adaptive red-flag screening, ocular discomfort scaling, and direct medical diary logging.', style: TextStyle(color: Colors.white70, fontSize: 11)),
                   ],
                 ),
               ),
@@ -897,9 +1385,191 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
           ),
         ),
         const SizedBox(height: 16),
+
+        // Visual Ocular Discomfort & Pain Slider Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: AppleGlassDecorations.frostedGlassBox(
+            color: Colors.white,
+            opacity: 0.9,
+            borderRadius: 18,
+            borderColor: isRedFlag ? Colors.red.withAlpha(80) : const Color(0xFF059669).withAlpha(40),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Ocular Discomfort / Irritation Level', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: _getSeverityColor(_triageSeverity.toInt()).withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${_triageSeverity.toInt()} / 10 • ${_getSeverityLabel(_triageSeverity.toInt())}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: _getSeverityColor(_triageSeverity.toInt()),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Slider(
+                value: _triageSeverity,
+                min: 0,
+                max: 10,
+                divisions: 10,
+                activeColor: _getSeverityColor(_triageSeverity.toInt()),
+                label: '${_triageSeverity.toInt()}',
+                onChanged: (val) {
+                  AppleGlassDecorations.lightHaptic();
+                  setState(() => _triageSeverity = val);
+                },
+              ),
+              const SizedBox(height: 6),
+              // Affected Eye Selector
+              Row(
+                children: [
+                  const Text('Affected Eye:', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  const SizedBox(width: 8),
+                  Wrap(
+                    spacing: 6,
+                    children: ['Left (OS)', 'Right (OD)', 'Both (OU)'].map((eye) {
+                      final isSelected = _triageEye == eye;
+                      return ChoiceChip(
+                        label: Text(eye, style: TextStyle(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                        selected: isSelected,
+                        selectedColor: const Color(0xFF059669),
+                        labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87),
+                        onSelected: (val) {
+                          if (val) {
+                            AppleGlassDecorations.lightHaptic();
+                            setState(() => _triageEye = eye);
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Emergency Red Flag Warning Banner (if acute pain/redness)
+        if (isRedFlag) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.red.shade400, width: 1.5),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.emergency_rounded, color: Colors.red.shade700, size: 22),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'ACUTE CLINICAL RED-FLAG DETECTED',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red.shade800),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Severe ocular pain (≥7/10) accompanied by redness, nausea, or halos around lights can signify Acute Closed-Angle Glaucoma or Corneal Ulceration. Do NOT wait. Seek emergency ophthalmologist care immediately.',
+                  style: TextStyle(fontSize: 11, color: Colors.red.shade900, height: 1.35),
+                ),
+                const SizedBox(height: 10),
+                FilledButton.icon(
+                  onPressed: () {
+                    AppleGlassDecorations.heavyHaptic();
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SymptomDiaryScreen()));
+                  },
+                  icon: const Icon(Icons.local_hospital_rounded, size: 16),
+                  label: const Text('Open Emergency Clinical Diary'),
+                  style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Targeted Triage Questions
+        const Text('Targeted Clinical Questions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const SizedBox(height: 8),
         ...questions.map((q) => _buildQuestionCard(context, q, service)),
+
+        const SizedBox(height: 12),
+
+        // 1-Tap Save to Medical Record / Symptom Diary
+        FilledButton.icon(
+          onPressed: () {
+            AppleGlassDecorations.heavyHaptic();
+            final repo = context.read<MedicationRepository>();
+            final log = SymptomLog(
+              id: const Uuid().v4(),
+              timestamp: DateTime.now(),
+              symptomType: _triageSeverity >= 7
+                  ? SymptomType.pain
+                  : _triageSeverity >= 4
+                      ? SymptomType.redness
+                      : SymptomType.dryness,
+              severity: _triageSeverity.toInt(),
+              notes: 'AI Triage Check-In: Affected $_triageEye. Questions logged.',
+              affectedEye: _triageEye,
+              escalationTriggered: _triageSeverity >= 7,
+            );
+            repo.addSymptomLog(log);
+            service.recordTriageCheckIn();
+            setState(() => _triageSavedToDiary = true);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('✅ Check-in saved directly to your Clinical Symptom Diary & Medical History!'),
+                backgroundColor: Color(0xFF059669),
+              ),
+            );
+          },
+          icon: Icon(_triageSavedToDiary ? Icons.check_circle_rounded : Icons.save_rounded, size: 18),
+          label: Text(_triageSavedToDiary ? 'Check-In Saved to Clinical Diary' : 'Save Check-In to Clinical Diary'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(double.infinity, 46),
+            backgroundColor: const Color(0xFF059669),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+        const SizedBox(height: 20),
       ],
     );
+  }
+
+  Color _getSeverityColor(int val) {
+    if (val <= 3) return const Color(0xFF10B981); // Green
+    if (val <= 6) return const Color(0xFFF59E0B); // Amber
+    return const Color(0xFFEF4444); // Red
+  }
+
+  String _getSeverityLabel(int val) {
+    if (val == 0) return 'None';
+    if (val <= 3) return 'Mild Gritty';
+    if (val <= 6) return 'Moderate Burning';
+    if (val <= 8) return 'Severe Pain';
+    return 'Emergency';
   }
 
   Widget _buildQuestionCard(BuildContext context, AiHealthCheckQuestion q, AiAssistantService service) {

@@ -192,6 +192,12 @@ class Medication {
 
   int? get daysRemainingAfterOpening => openedDaysRemaining;
 
+  bool get isOpenedWindowClosingSoon {
+    final remaining = openedDaysRemaining;
+    if (remaining == null) return false;
+    return remaining <= 3 && remaining > 0;
+  }
+
   /// Determines whether this medication is scheduled to be taken on a specific calendar date
   bool isScheduledForDay(DateTime date) {
     // 1. Date boundaries check

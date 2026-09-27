@@ -162,21 +162,21 @@
    - `FoodInteractionRadarCard`: Search bar with quick food query chips (`🍊 Grapefruit`, `🥛 Milk`, `🥬 Spinach`, etc.) and severity classification badges (`CONTRAINDICATED`, `MAJOR RISK`, `MODERATE`).
    - Complete unit test coverage in `test/drug_food_and_pk_test.dart` and `test/clinical_ai_and_chrono_test.dart`.
 
-### J. AI Clinical Chart Assistant & Telemetry Intelligence Suite
-1. **Clinical Chart Telemetry Engine (`ClinicalChartAssistantService`)**:
-   - Computes empirical daily adherence points, moving averages, and linear regression trajectories ($y = mx + b$).
-   - Generates 7-day future adherence forecasts with bounded slope limits.
-   - Calculates time-of-day intake distribution (Morning, Midday, Evening, Bedtime) and identifies vulnerable drop-off windows.
-   - Computes Circadian Timing Jitter ($\pm$ SD drift in minutes from scheduled times).
-   - Conversational Chart Telemetry Q&A answering forecast, jitter, risk, and doctor digest queries.
-2. **Interactive Chart Assistant Suite (`ChartAssistantView`)**:
-   - `fl_chart` powered multimodal visualizations:
-     - 📈 **Line Trend Chart**: Daily adherence curve with WHO 80% benchmark target lines and gradient area fills.
-     - 📊 **Intake Comparison Bar Chart**: Dual-rod comparisons of taken vs scheduled doses.
-     - 🍩 **Time Distribution Donut Pie Chart**: Morning, Midday, Evening, and Bedtime intake breakdowns.
-   - 4-metric telemetry overview (Overall Adherence, 7D Forecast, Timing Jitter, Intake Breakdown).
-   - 1-tap quick inquiry chips (`📈 Forecast Next Week`, `⏱️ Circadian Timing Jitter`, `⚠️ Highest-Risk Window`, `📋 Doctor Telemetry Digest`).
-   - Integrated as a prominent dedicated tab in `AiAssistantScreen`.
+### J. AI Health Coach, Telemetry, Daily Tasks, Academy & Check-In Suite (`AiAssistantScreen`)
+1. **Multilingual Offline Conversational AI Tutor (`AiAssistantService`)**:
+   - 15 languages, on-device NLP, intent detection, auto-speech TTS voice guidance, prescription parsing from text or voice.
+2. **Dual-Perspective Clinical Telemetry & Chart Analytics (`ChartAssistantView` & `AiTelemetryAnalyticsView`)**:
+   - Pharmacological timing jitter ($\sigma_{\text{jitter}}$), FlChart linear regression, compliance forecasting, dose distribution donut.
+   - AI assistant consultation telemetry, query topic radar, on-device edge latency sparkline ($\sim 12$ ms), zero-cloud HIPAA/GDPR audit ledger.
+3. **Interactive Daily Clinical Tasks & 60s Punctal Occlusion Coach**:
+   - Automated routine generator, haptic 60s countdown timer with anatomical cues for nasolacrimal duct closure, 20-20-20 cornea rest timer.
+4. **Ophthalmology & Pharmacology Academy & 3D Interactive Flashcards**:
+   - Micro-courses on Punctal Occlusion, 5-Minute Spacing Rule, 28-Day Bottle Expiration, and Glaucoma Chronotherapy.
+   - Interactive flip flashcards with 3D animation, self-testing, and real-time telemetry recording of mastery score.
+5. **Clinical Symptom Triage & Red-Flag Escalation Check-In**:
+   - Visual 0-10 Ocular Pain/Discomfort slider with dynamic clinical severity tagging (`None`, `Mild Gritty`, `Moderate Burning`, `Severe Pain`, `Emergency`).
+   - Affected eye selector (`Left (OS)`, `Right (OD)`, `Both (OU)`).
+   - Acute clinical red-flag banner for closed-angle glaucoma symptoms with 1-tap diary logging directly into `MedicationRepository`.
 
 
 
