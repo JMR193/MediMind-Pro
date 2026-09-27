@@ -145,5 +145,21 @@
    - **Adaptive Circadian Timing Learner**: Analyzes mean drift ($\Delta t$) and standard deviation ($\sigma$) to recommend alarm window shifts matching actual patient routines.
    - **Cognitive Latency Drift & Anomaly Detector**: Exponential Moving Average (EMA) and Z-score tracking of response latency to alert caregivers of early cognitive decline or regimen burnout.
 5. **Smart Chronotherapy & AI Advisor Screen (`SmartChronotherapyAdvisorScreen`)**:
-   - 3-tab clinical intelligence suite: Circadian Chronogram & Regimen Optimizer, Behavioral ML Radar, and Latin Sig Decrypter Playground.
+   - Scaled into a unified 5-tab Clinical Intelligence Suite: Circadian AI, Digital Twin PK, Food & Diet AI, Behavioral ML, and Latin Sig Decrypter.
+
+### I. Digital Twin Pharmacokinetics (PK) & Drug-Food-Nutrient AI Architecture
+1. **Mathematical Pharmacokinetic Simulator (`PharmacokineticSimulatorService`)**:
+   - 1-Compartment extravascular open Bateman function:
+     $$C(t) = \frac{F \cdot D \cdot k_a}{V_d (k_a - k_e)} (e^{-k_e t} - e^{-k_a t})$$
+   - Linear superposition multi-dose accumulation engine calculating steady-state peak ($C_{\max, ss}$), trough ($C_{\min, ss}$), and percentage of time in the therapeutic window ($MEC \le C \le MTC$).
+   - Curated pharmacokinetic constants for 9 clinical drug families (Atorvastatin, Amlodipine, Metoprolol, Metformin, Warfarin, Levothyroxine, Ciprofloxacin, Timolol, Lisinopril) + heuristic fallbacks.
+   - Interactive "What-If" scenario simulator (Normal, 4h Late, Missed Dose, Accidental Double-Dose).
+2. **Deterministic Drug-Food-Nutrient AI Engine (`DrugFoodInteractionAiService`)**:
+   - Knowledge base spanning CYP3A4 irreversible inhibition (Grapefruit furanocoumarins), multivalent cation chelation (Dairy/Calcium with fluoroquinolones and tetracyclines), pharmacodynamic antagonism (Vitamin K greens vs Warfarin), hyperkalemia synergism (ACEi/ARBs + high potassium), alcohol CNS depression & disulfiram-like reactions (Metronidazole), tyramine pressor crises (MAOIs), and protein transport competition (Levodopa).
+   - Cabinet-wide automated screening with actionable spacing intervals (e.g. 2h/4h buffers) and instant interactive food search query console.
+3. **Interactive Visual Modules**:
+   - `DigitalTwinPkCard`: High-precision custom canvas chart rendering continuous blood plasma concentration curves, shaded therapeutic window (MEC-MTC), MTC toxic threshold lines, and live time indicators.
+   - `FoodInteractionRadarCard`: Search bar with quick food query chips (`🍊 Grapefruit`, `🥛 Milk`, `🥬 Spinach`, etc.) and severity classification badges (`CONTRAINDICATED`, `MAJOR RISK`, `MODERATE`).
+   - Complete unit test coverage in `test/drug_food_and_pk_test.dart` and `test/clinical_ai_and_chrono_test.dart`.
+
 

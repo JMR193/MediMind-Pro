@@ -4,7 +4,10 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../data/services/clinical_expert_ai_service.dart';
 import '../../../data/services/behavioral_ml_engine.dart';
 import '../../../domain/models/medication.dart';
+import '../../../domain/models/dose_log.dart';
 import '../../core/apple_glass_decorations.dart';
+import 'digital_twin_pk_card.dart';
+import 'food_interaction_radar_card.dart';
 
 class SmartChronotherapyAdvisorScreen extends StatefulWidget {
   const SmartChronotherapyAdvisorScreen({super.key});
@@ -18,11 +21,12 @@ class _SmartChronotherapyAdvisorScreenState extends State<SmartChronotherapyAdvi
   late TabController _tabController;
   final TextEditingController _sigInputController = TextEditingController(text: 'Metformin 500mg 1 TAB PO BID PC');
   ParsedMedicalSig? _parsedSig;
+  String? _selectedPkMedication;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _parseCurrentSig();
   }
 
@@ -65,11 +69,14 @@ class _SmartChronotherapyAdvisorScreenState extends State<SmartChronotherapyAdvi
         ),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           labelColor: const Color(0xFF0D9488),
           indicatorColor: const Color(0xFF0D9488),
           unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(icon: Icon(Icons.access_time_filled_rounded, size: 20), text: 'Circadian AI'),
+            Tab(icon: Icon(Icons.show_chart_rounded, size: 20), text: 'Digital Twin PK'),
+            Tab(icon: Icon(Icons.restaurant_rounded, size: 20), text: 'Food & Diet AI'),
             Tab(icon: Icon(Icons.analytics_rounded, size: 20), text: 'Behavioral ML'),
             Tab(icon: Icon(Icons.translate_rounded, size: 20), text: 'Sig Decrypter'),
           ],
@@ -86,10 +93,16 @@ class _SmartChronotherapyAdvisorScreenState extends State<SmartChronotherapyAdvi
               // Tab 1: Chronotherapy Circadian Alignment
               _buildCircadianTab(context, meds, repo),
 
-              // Tab 2: Behavioral Machine Learning & Anomaly Radar
+              // Tab 2: Digital Twin Pharmacokinetic Blood Plasma Simulator
+              _buildPkSimulatorTab(context, meds, logs),
+
+              // Tab 3: Drug-Food-Nutrient Interaction AI Radar
+              _buildFoodDietAiTab(context, meds),
+
+              // Tab 4: Behavioral Machine Learning & Anomaly Radar
               _buildBehavioralMlTab(context, meds, logs, repo),
 
-              // Tab 3: Doctor Sig Latin Shorthand Decrypter Playground
+              // Tab 5: Doctor Sig Latin Shorthand Decrypter Playground
               _buildSigDecrypterTab(context, repo),
             ],
           );
@@ -335,9 +348,179 @@ class _SmartChronotherapyAdvisorScreenState extends State<SmartChronotherapyAdvi
   }
 
   // ─────────────────────────────────────────────────────────────
-  // TAB 2: BEHAVIORAL MACHINE LEARNING & ANOMALIES
+  // TAB 2: DIGITAL TWIN PHARMACOKINETIC BLOOD PLASMA SIMULATOR
   // ─────────────────────────────────────────────────────────────
-  Widget _buildBehavioralMlTab(BuildContext context, List<Medication> meds, List<dynamic> logs, MedicationRepository repo) {
+  Widget _buildPkSimulatorTab(BuildContext context, List<Medication> meds, List<DoseLog> logs) {
+    final activeNames = meds.map((m) => m.name).toList();
+    final defaultOptions = [
+      if (activeNames.isNotEmpty) ...activeNames,
+      'Atorvastatin',
+      'Amlodipine',
+      'Metoprolol',
+      'Warfarin',
+      'Metformin',
+      'Levothyroxine',
+      'Timolol',
+    ];
+
+    final currentMed = _selectedPkMedication ?? (activeNames.isNotEmpty ? activeNames.first : 'Atorvastatin');
+    final relevantLogs = logs
+        .where((l) => l.medicationName.toLowerCase().contains(currentMed.toLowerCase()))
+        .map((l) => l.timestamp)
+        .toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Medication Selector Header
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: AppleGlassDecorations.frostedGlassBox(
+              color: Colors.white,
+              opacity: 0.9,
+              borderRadius: 16,
+              borderColor: const Color(0xFF0D9488).withAlpha(40),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.medication_rounded, size: 18, color: Color(0xFF0D9488)),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Select Drug for PK Simulation:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: defaultOptions.map((name) {
+                      final isSelected = currentMed.toLowerCase() == name.toLowerCase();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: ChoiceChip(
+                          label: Text(name, style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                          selected: isSelected,
+                          selectedColor: const Color(0xFF0D9488),
+                          labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black87),
+                          onSelected: (val) {
+                            if (val) {
+                              AppleGlassDecorations.lightHaptic();
+                              setState(() => _selectedPkMedication = name);
+                            }
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Main Interactive Digital Twin PK Visualizer
+          DigitalTwinPkCard(
+            medicationName: currentMed,
+            doseMg: 20.0,
+            pastDoseTimestamps: relevantLogs,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Biomathematics Scientific Explainer
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDFA),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF99F6E4)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.science_rounded, size: 16, color: Color(0xFF0D9488)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Bateman Pharmacokinetic Science',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F766E)),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'The 1-compartment Bateman open model simulates real-time blood plasma curves via extravascular absorption (ka) and hepatic/renal clearance (ke). When doses are taken late, plasma levels dip into the sub-therapeutic failure zone; double-dosing risks crossing the Minimum Toxic Concentration (MTC).',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF115E59), height: 1.35),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // TAB 3: DRUG-FOOD-NUTRIENT INTERACTION AI RADAR
+  // ─────────────────────────────────────────────────────────────
+  Widget _buildFoodDietAiTab(BuildContext context, List<Medication> meds) {
+    final medNames = meds.map((m) => m.name).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FoodInteractionRadarCard(
+            activeMedicationNames: medNames,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF7ED),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFFED7AA)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFFEA580C)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Biochemical Synergy & Chelation Notice',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFC2410C)),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Food interactions are governed by intestinal Cytochrome P450 3A4 inhibition (e.g. Grapefruit furanocoumarins), multivalent cation chelation (Calcium/Dairy binding antibiotics), and dietary competitive antagonism (Vitamin K greens counteracting Warfarin). Check before taking meals or supplements.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF9A3412), height: 1.35),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // TAB 4: BEHAVIORAL MACHINE LEARNING & ANOMALIES
+  // ─────────────────────────────────────────────────────────────
+  Widget _buildBehavioralMlTab(BuildContext context, List<Medication> meds, List<DoseLog> logs, MedicationRepository repo) {
     final riskProfile = BehavioralMlEngine.analyzeAdherenceRisk(medications: meds, logs: repo.logs);
     final adaptiveSuggestions = BehavioralMlEngine.calculateAdaptiveSuggestions(medications: meds, logs: repo.logs);
     final cognitiveAnomaly = BehavioralMlEngine.detectCognitiveDrift(logs: repo.logs);
