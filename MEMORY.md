@@ -104,3 +104,29 @@
    - Remote medication schedule management and low-inventory reordering.
    - Integrated doorstep delivery hub supporting partner pharmacies (Apollo Pharmacy, Netmeds, Tata 1mg, MedPlus).
    - 20% savings badge and live 4-stage order tracker (`Order Placed -> Packed -> Out for Delivery -> Delivered`).
+
+### G. 3D Visualizations, Emotional Mascot & Realistic Simulation Suite
+1. **Procedural 3D Vector Mascot "Pip the MediBuddy" (`MediBuddyCharacter`)**:
+   - 100% offline, zero-asset procedural vector mascot running at 60/120 FPS.
+   - Dynamic emotional states: `happy`, `encouraging`, `celebrating` (with confetti), `sleeping` (with floating Zzz bubbles), and `dropletGuide`.
+   - Interactivity: Eye blinking, touch-following pupil tracking, tap-to-bounce physics, and uplifting Text-to-Speech (TTS) voice encouragement.
+   - Wardrobes: Doctor (stethoscope & reflector), Nurse (cross cap), Champion (gold medal), and Casual.
+2. **Dashboard Companion Header (`CompanionCardWidget`)**:
+   - Dynamic greeting and contextual health speech bubbles based on time of day and adherence score.
+   - Interactive outfit cycling and direct 1-tap navigation to the 3D Visual Studio.
+3. **Interactive 3D Medication Inspector (`Interactive3dPillViewer`)**:
+   - Real-time Matrix4 3D perspective projection with dual-axis touch drag orbital rotation and turntable auto-spin.
+   - Dynamic specular lighting and realistic shading across 4 pharmaceutical models:
+     - Bicolor Gelatin Capsule (translucent cap with visible micro-pellets).
+     - Scored Round Tablet (debossed break-line and strength imprints).
+     - Diamond Chamfered Tablet (faceted polygonal pill).
+     - Ophthalmic Dropper Bottle (translucent squeeze bottle with gravity-reacting sloshing liquid meniscus).
+4. **Animated Fluid Hydration Wave Tracker (`AnimatedWaterWaveTracker`)**:
+   - Dual-sine wave animated fluid simulation with rising micro-bubbles.
+   - Clinical guidance for swallowing oral tablets with 200–250ml water to prevent esophageal ulceration.
+5. **3D Ophthalmic Eye Drop Simulator (`Ophthalmic3dDropSimulator`)**:
+   - 3D perspective simulated eye cornea and dropper bottle.
+   - Surface tension drop formation, detachment drip, and corneal tear-film dispersion ripples.
+   - Integrated 60-second punctal occlusion guidance.
+6. **3D Visual Studio & Pip Laboratory (`VisualLabScreen`)**:
+   - 3-tab interactive laboratory combining the 3D Pill Inspector, MediBuddy Studio, and Fluid & Eye Drop Simulators.

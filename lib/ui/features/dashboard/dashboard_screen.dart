@@ -39,6 +39,8 @@ import '../emergency/sos_emergency_screen.dart';
 import '../medications/stock_out_alert_screen.dart';
 import '../alarm/medicine_alarm_dialog.dart';
 import '../guardian_mode/guardian_dashboard_screen.dart';
+import '../companion/companion_card_widget.dart';
+import '../visuals_3d/visual_lab_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -77,6 +79,10 @@ class DashboardScreen extends StatelessWidget {
 
               // Multi-Patient Family Profile Switcher Bar
               _buildProfileSwitcherBar(context, repo),
+              const SizedBox(height: 16),
+
+              // MediBuddy Pip Companion Card (Emotional Avatar & Voice Guide)
+              const CompanionCardWidget(),
               const SizedBox(height: 16),
 
               // CareLink Elderly Care & Well-Being Quick Check-in Module (Dribbble 27342041)
@@ -709,6 +715,42 @@ class DashboardScreen extends StatelessWidget {
                   );
                 }
               },
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildToolButton(
+              context,
+              icon: Icons.view_in_ar_rounded,
+              label: '3D Pill Lab',
+              color: const Color(0xFF7C3AED),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.water_drop_rounded,
+              label: 'Hydration',
+              color: const Color(0xFF0284C7),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.face_rounded,
+              label: 'Pip Avatar',
+              color: const Color(0xFFEC4899),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.remove_red_eye_rounded,
+              label: 'Drop 3D',
+              color: const Color(0xFF0D9488),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
             ),
           ],
         ),
