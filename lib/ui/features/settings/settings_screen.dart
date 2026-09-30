@@ -6,6 +6,10 @@ import '../../../domain/models/app_settings.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../../core/theme.dart';
 import '../device_integration/device_optimization_screen.dart';
+import '../emergency_hud/universal_emergency_hud_screen.dart';
+import '../refill_forecast/refill_forecast_screen.dart';
+import '../safety_scanner/medication_safety_scanner_screen.dart';
+import '../travel/travel_dose_shifter_screen.dart';
 import '../wearable/wearable_companion_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -73,6 +77,48 @@ class SettingsScreen extends StatelessWidget {
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const WearableCompanionScreen()),
+                  ),
+                ),
+              ]),
+              _buildSection(context, '🌍 Global Patient Safety & Travel Suite', [
+                _buildNavigationTile(
+                  context,
+                  'Scan-Before-Swallow HUD',
+                  'Optical safety check to prevent accidental wrong-bottle ingestion',
+                  Icons.qr_code_scanner_rounded,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MedicationSafetyScannerScreen()),
+                  ),
+                ),
+                _buildNavigationTile(
+                  context,
+                  'Circadian Travel Dose Shifter',
+                  'Jet-lag phase shift protocols for international flights across timezones',
+                  Icons.flight_takeoff_rounded,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TravelDoseShifterScreen()),
+                  ),
+                ),
+                _buildNavigationTile(
+                  context,
+                  'Paramedic Emergency HUD (Multilingual)',
+                  'Offline life-saving ICE pass with 10 languages & anticoagulant alert',
+                  Icons.emergency_rounded,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const UniversalEmergencyHudScreen()),
+                  ),
+                ),
+                _buildNavigationTile(
+                  context,
+                  'Pharmacy Desert & Refill Forecaster',
+                  'Stock depletion timeline with weekend refill cliff warning',
+                  Icons.inventory_2_outlined,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RefillForecastScreen()),
                   ),
                 ),
               ]),

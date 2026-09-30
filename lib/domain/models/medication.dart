@@ -146,6 +146,12 @@ class Medication {
 
   bool get needsRefill => totalInventoryCount <= refillThreshold;
 
+  // Convenience & compatibility getters
+  bool get isOphthalmic => requiresEyeDropProtocol || category == MedCategory.eyeDrop || category == MedCategory.eyeOintment;
+  String get dosage => '$dosageAmount ${dosageUnit.name}';
+  int get currentSupply => totalInventoryCount;
+  List<String> get scheduledTimes => scheduleTimes;
+
   // Estimated days of supply remaining based on doses per day
   int get estimatedDaysSupplyRemaining {
     final dailyDoses = scheduleTimes.isNotEmpty ? scheduleTimes.length * dosageAmount : dosageAmount;

@@ -42,6 +42,10 @@ import '../guardian_mode/guardian_dashboard_screen.dart';
 import '../companion/companion_card_widget.dart';
 import '../visuals_3d/visual_lab_screen.dart';
 import '../ai_advisor/smart_chronotherapy_advisor_screen.dart';
+import '../emergency_hud/universal_emergency_hud_screen.dart';
+import '../refill_forecast/refill_forecast_screen.dart';
+import '../safety_scanner/medication_safety_scanner_screen.dart';
+import '../travel/travel_dose_shifter_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -760,6 +764,42 @@ class DashboardScreen extends StatelessWidget {
               label: 'Drop 3D',
               color: const Color(0xFF059669),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VisualLabScreen())),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildToolButton(
+              context,
+              icon: Icons.qr_code_scanner_rounded,
+              label: 'Scan Check',
+              color: const Color(0xFF06B6D4),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicationSafetyScannerScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.flight_takeoff_rounded,
+              label: 'Travel Shift',
+              color: const Color(0xFF3B82F6),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TravelDoseShifterScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.emergency_rounded,
+              label: 'ICE Pass',
+              color: const Color(0xFFEF4444),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const UniversalEmergencyHudScreen())),
+            ),
+            const SizedBox(width: 8),
+            _buildToolButton(
+              context,
+              icon: Icons.inventory_2_outlined,
+              label: 'Refill Run',
+              color: const Color(0xFF10B981),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RefillForecastScreen())),
             ),
           ],
         ),
