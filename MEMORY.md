@@ -178,5 +178,35 @@
    - Affected eye selector (`Left (OS)`, `Right (OD)`, `Both (OU)`).
    - Acute clinical red-flag banner for closed-angle glaucoma symptoms with 1-tap diary logging directly into `MedicationRepository`.
 
+### K. Smartwatch & Wearable Companion Suite (Wear OS & watchOS)
+1. **Hardware Smartwatch Simulator & Live Sync Engine (`WearableSyncService`, `WearableCompanionScreen`)**:
+   - Hardware watch form-factors: Wear OS Circular (Galaxy/Pixel Watch 450x450) and Apple Watch Rounded Rectangle (410x502).
+   - 3 interactive watchface modes:
+     - Mode 1: Next-Dose Wrist Tile with countdown timer, medication color accent, and direct 1-tap `✓ Taken` / `⏰ 10m` snooze actions.
+     - Mode 2: 60-Second Punctal Occlusion Wrist Coach with circular countdown ring, play/pause controls, and haptic pulses every 10 seconds.
+     - Mode 3: Live Circular Adherence Rings showing today's intake progress percentage.
+   - Built-in tactile wrist haptic feedback engine (`subtleTick`, `gentlePulse`, `strongAlert`, `emergencyStaccato`).
+   - Sync bridge payload compiler with zero cloud leakage, preserving total offline privacy.
 
-
+### L. 10x Global Patient Safety & Universal Travel Suite
+1. **Circadian Travel & Jet-Lag Dose Shifter (`CircadianTravelService`, `TravelDoseShifterScreen`)**:
+   - Solves the international timezone gap: calculates progressive 1.5h to 2h/day circadian phase shift protocols between origin and destination timezones.
+   - Narrow Therapeutic Index drug detection (Warfarin, Tacrolimus, Insulin, Glaucoma drops) with strict conservative shifting to prevent lethal drug accumulation or subtherapeutic troughs.
+   - Global timezone registry spanning US, Europe, India, UAE, SE Asia, Japan, Australia, and New Zealand.
+   - In-flight safety rules: cabin pressure dropper precautions, insulin cold-chain integrity, and TSA liquid exemptions.
+2. **"Scan-Before-Swallow" / "Verify-Before-Instill" Safety Scanner (`MedicationSafetyScannerScreen`)**:
+   - Camera reticle optical viewfinder with active laser sweep and torch control.
+   - Real-time dose verification: matches scanned vial label against the patient's currently due scheduled dose.
+   - Emerald Green Verified Safe Shield vs. Blaring Red Hazard Alarm: *"⚠️ DANGER: WRONG MEDICATION! Scanned bottle does NOT match scheduled dose. DO NOT TAKE!"*
+   - Interactive testing rig for instant simulation of correct and wrong vial scans.
+3. **Universal Multilingual Paramedic ICE (In Case of Emergency) HUD (`UniversalEmergencyHudScreen`)**:
+   - Instant 1-tap translation into 10 world languages (English, Spanish, Hindi, French, Mandarin, Japanese, Arabic, German, Russian, Portuguese).
+   - Life-saving red-flag alert banners: Anticoagulant warning (Warfarin/DOACs) to prevent fatal hemorrhage from thrombolytics (tPA), severe allergy flags, and blood group tag.
+   - Dynamic worldwide emergency dispatch speed-dial: switches between 911 (US/Canada), 112 (Europe/India), 999 (UK), 119 (Japan), and 000 (Australia).
+   - Scannable high-density QR medical passport readable by any paramedic scanner without internet.
+4. **Smart Refill & Weekend Refill Cliff Forecaster (`RefillForecastScreen`)**:
+   - Daily burn-rate calculations predicting exact depletion date and weekday.
+   - "Weekend Refill Cliff" warning highlighting medications running out on Saturdays or Sundays when pharmacies and clinics are closed.
+   - 1-tap pre-formatted WhatsApp/SMS prescription replenishment request generator.
+5. **Full Unit Test Verification**:
+   - `test/global_safety_and_travel_test.dart` passes with 100% green checkmarks across circadian phase shifts, narrow therapeutic index detections, and timezone calculations.
