@@ -125,7 +125,7 @@ class CircadianTravelService {
       dateLabel: 'Departure Day (${origin.city})',
       scheduledTime: originalTime,
       shiftHoursFromOrigin: 0,
-      clinicalInstruction: 'Take regular dose at ${originalTime} (${origin.region}) before boarding. Keep all medication in carry-on bag.',
+      clinicalInstruction: 'Take regular dose at $originalTime (${origin.region}) before boarding. Keep all medication in carry-on bag.',
       isFlightDay: true,
     ));
 

@@ -6,6 +6,7 @@ import '../../../domain/models/medication_log.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../../core/theme.dart';
 import '../../core/utils.dart';
+import '../companion/medi_buddy_character.dart';
 
 class MedicineAlarmDialog extends StatefulWidget {
   final Medication medication;
@@ -178,37 +179,51 @@ class _MedicineAlarmDialogState extends State<MedicineAlarmDialog> with SingleTi
             ),
             const SizedBox(height: 20),
 
-            // Ringing Bell Illustration with Glow
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFCDE1FF), Color(0xFFE2EDFF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryBlue.withAlpha(60),
-                    blurRadius: 18,
-                    spreadRadius: 2,
+            // Ringing Bell & Pip Companion Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 76,
+                  height: 76,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFCDE1FF), Color(0xFFE2EDFF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryBlue.withAlpha(60),
+                        blurRadius: 16,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Center(
-                child: RotationTransition(
-                  turns: _bellAnimation,
-                  child: const Icon(
-                    Icons.notifications_active_rounded,
-                    color: primaryBlue,
-                    size: 46,
+                  child: Center(
+                    child: RotationTransition(
+                      turns: _bellAnimation,
+                      child: const Icon(
+                        Icons.notifications_active_rounded,
+                        color: primaryBlue,
+                        size: 38,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                MediBuddyCharacter(
+                  mood: med.isOphthalmic ? MediBuddyMood.dropletGuide : MediBuddyMood.encouraging,
+                  outfit: MediBuddyOutfit.doctor,
+                  size: 96,
+                  customSpeechText: med.isOphthalmic
+                      ? 'Drop time! Wash your hands first!'
+                      : 'Take with a glass of water!',
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Medication Pill Card
             Container(

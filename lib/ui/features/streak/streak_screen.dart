@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication_log.dart';
+import '../companion/medi_buddy_character.dart';
 import '../../core/theme.dart';
 
 class StreakScreen extends StatefulWidget {
@@ -48,8 +49,13 @@ class _StreakScreenState extends State<StreakScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.local_fire_department, color: Colors.white, size: 64),
-                      const SizedBox(height: 8),
+                      MediBuddyCharacter(
+                        mood: MediBuddyMood.celebrating,
+                        outfit: MediBuddyOutfit.champion,
+                        size: 130,
+                        customSpeechText: 'Incredible adherence! You have maintained a ${streak.currentStreak}-day streak! Keep up the healthy habits!',
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         '${streak.currentStreak} DAYS',
                         style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: 1),

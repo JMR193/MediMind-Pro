@@ -4,6 +4,7 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../core/utils.dart';
 import '../../core/theme.dart';
+import '../companion/medi_buddy_character.dart';
 import '../medication_wizard/add_medication_screen.dart';
 
 class MedicationsListScreen extends StatelessWidget {
@@ -17,21 +18,33 @@ class MedicationsListScreen extends StatelessWidget {
 
         if (meds.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.medication_outlined, size: 80, color: Colors.grey.withAlpha(102)),
-                const SizedBox(height: 16),
-                const Text('No Medications Yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('Tap + to add your first medication', style: TextStyle(color: Colors.grey.withAlpha(179))),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddMedicationScreen())),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Medication'),
-                ),
-              ],
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const MediBuddyCharacter(
+                    mood: MediBuddyMood.happy,
+                    outfit: MediBuddyOutfit.doctor,
+                    size: 150,
+                    customSpeechText: 'Your medicine cabinet is currently clean and empty! Tap below to add your first prescription.',
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('No Medications in Cabinet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text('Tap below to add your scheduled pills, drops, or inhalers.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.withAlpha(179))),
+                  const SizedBox(height: 24),
+                  FilledButton.icon(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddMedicationScreen())),
+                    icon: const Icon(Icons.add_rounded),
+                    label: const Text('Add Medication'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }

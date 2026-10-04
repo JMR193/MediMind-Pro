@@ -1,8 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
-import '../../core/theme.dart';
+import '../../../domain/models/medication_log.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../../core/one_ui_widgets.dart';
 
@@ -21,7 +21,7 @@ class DigitalPillboxScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text('Pillbox: '),
+            title: Text('Pillbox: ${profile.name}'),
             actions: [
               IconButton(
                 icon: const Icon(Icons.info_outline),
@@ -166,7 +166,7 @@ class DigitalPillboxScreen extends StatelessWidget {
                       repo.takeAllSlotDoses(slotTitle);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('✓ Marked all  medications as taken.'),
+                          content: Text('✓ Marked all $slotTitle medications as taken.'),
                           backgroundColor: Colors.green,
                           duration: const Duration(seconds: 2),
                         ),
@@ -186,7 +186,7 @@ class DigitalPillboxScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.check_circle_outline, color: Colors.grey.withAlpha(100), size: 18),
                   const SizedBox(width: 8),
-                  Text('No doses scheduled for ', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text('No doses scheduled for $slotTitle', style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 ],
               ),
             )
@@ -196,7 +196,7 @@ class DigitalPillboxScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(12),
               itemCount: medications.length,
-              separatorBuilder: (_, __) => const Divider(height: 12),
+              separatorBuilder: (_, _) => const Divider(height: 12),
               itemBuilder: (context, idx) {
                 final med = medications[idx];
                 return Row(
@@ -243,7 +243,7 @@ class DigitalPillboxScreen extends StatelessWidget {
                           status: LogStatus.taken,
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('✓ Took ')),
+                          SnackBar(content: Text('✓ Took ${med.name}')),
                         );
                       },
                     ),

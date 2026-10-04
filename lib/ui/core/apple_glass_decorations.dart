@@ -158,3 +158,36 @@ class AppleGlassDecorations {
     );
   }
 }
+
+/// Standalone Widget wrapper for AppleGlassDecorations.glassCard
+class AppleGlassCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+  final double borderRadius;
+  final Color? tintColor;
+  final VoidCallback? onTap;
+
+  const AppleGlassCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.margin = const EdgeInsets.symmetric(vertical: 6),
+    this.borderRadius = 22.0,
+    this.tintColor,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppleGlassDecorations.glassCard(
+      context: context,
+      child: child,
+      padding: padding,
+      margin: margin,
+      borderRadius: borderRadius,
+      tintColor: tintColor,
+      onTap: onTap,
+    );
+  }
+}

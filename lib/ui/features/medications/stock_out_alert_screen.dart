@@ -10,7 +10,8 @@ import '../qr_share/qr_code_share_screen.dart';
 class StockOutAlertScreen extends StatelessWidget {
   const StockOutAlertScreen({super.key});
 
-  void _notifyGuardianViaSms(BuildContext context, String phone, List<Medication> lowMeds) async {
+  void _notifyGuardianViaSms(BuildContext context, String? phone, List<Medication> lowMeds) async {
+    if (phone == null || phone.isEmpty) return;
     AppleGlassDecorations.mediumHaptic();
     final medNames = lowMeds.map((m) => '${m.name} (${m.totalInventoryCount} left)').join(', ');
     final message = 'Hi, my medication supply is running low: $medNames. Please help me reorder.';
@@ -27,7 +28,8 @@ class StockOutAlertScreen extends StatelessWidget {
     }
   }
 
-  void _callGuardian(BuildContext context, String phone) async {
+  void _callGuardian(BuildContext context, String? phone) async {
+    if (phone == null || phone.isEmpty) return;
     AppleGlassDecorations.lightHaptic();
     final uri = Uri.parse('tel:$phone');
     if (await canLaunchUrl(uri)) {

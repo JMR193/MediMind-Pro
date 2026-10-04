@@ -27,6 +27,9 @@ class MedicationLog {
     this.notes,
   });
 
+  bool get isTaken => status == LogStatus.taken;
+  bool get isSkipped => status == LogStatus.skipped || status == LogStatus.missed;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

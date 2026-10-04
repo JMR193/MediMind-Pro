@@ -3,8 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
-import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
+import '../../../domain/models/medication_log.dart';
 
 enum ScanVerificationState {
   idle,
@@ -382,12 +381,12 @@ class _MedicationSafetyScannerScreenState extends State<MedicationSafetyScannerS
             FilledButton.icon(
               onPressed: () {
                 if (_targetMedication != null) {
-                  repo.logDoseTaken(
-                    medicationId: _targetMedication!.id,
-                    scheduledTime: _targetMedication!.scheduledTimes.isNotEmpty
-                        ? _targetMedication!.scheduledTimes.first
+                  repo.logDose(
+                    medication: _targetMedication!,
+                    scheduledTime: _targetMedication!.scheduleTimes.isNotEmpty
+                        ? _targetMedication!.scheduleTimes.first
                         : '08:00',
-                    actualTime: DateTime.now(),
+                    status: LogStatus.taken,
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

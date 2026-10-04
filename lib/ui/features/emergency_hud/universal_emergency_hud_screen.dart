@@ -4,8 +4,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../../domain/models/user_profile.dart';
-import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
 
 class SupportedEmergencyLanguage {
   final String code;
@@ -134,7 +132,7 @@ class _UniversalEmergencyHudScreenState extends State<UniversalEmergencyHudScree
   @override
   Widget build(BuildContext context) {
     final repo = context.watch<MedicationRepository>();
-    final profile = repo.userProfile ?? const UserProfile(name: 'Emergency Patient');
+    final profile = repo.userProfile ?? const UserProfile(id: 'emergency_default', name: 'Emergency Patient');
     final meds = repo.activeMedications;
 
     final hasAnticoagulant = meds.any((m) {
@@ -206,7 +204,7 @@ class _UniversalEmergencyHudScreenState extends State<UniversalEmergencyHudScree
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _languages.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final l = _languages[i];
           final isSelected = l.code == _selectedLang.code;

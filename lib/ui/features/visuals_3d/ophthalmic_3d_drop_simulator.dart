@@ -28,7 +28,6 @@ class _Ophthalmic3dDropSimulatorState extends State<Ophthalmic3dDropSimulator>
 
   bool _isDropping = false;
   bool _punctalOcclusionActive = false;
-  int _occlusionCountdown = 60;
 
   @override
   void initState() {
@@ -81,7 +80,6 @@ class _Ophthalmic3dDropSimulatorState extends State<Ophthalmic3dDropSimulator>
         setState(() {
           _isDropping = false;
           _punctalOcclusionActive = true;
-          _occlusionCountdown = 60;
         });
         AppleGlassDecorations.heavyHaptic();
         widget.onDropCompleted?.call();
@@ -234,7 +232,6 @@ class _Ophthalmic3dPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
-    final cy = size.height / 2;
 
     // 1. Draw 3D Anatomical Eye Cornea at bottom
     final eyeY = size.height * 0.78;
@@ -304,7 +301,6 @@ class _Ophthalmic3dPainter extends CustomPainter {
     canvas.restore();
 
     // 3. Falling Liquid Droplet
-    final nozzleX = cx + math.sin(-bottleTilt) * 20;
     final nozzleY = size.height * 0.28 + math.cos(bottleTilt) * 20;
 
     if (dropFormation > 0.0 && dropFall < 1.0) {

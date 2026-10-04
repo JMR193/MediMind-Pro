@@ -1,8 +1,8 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
 import '../../core/one_ui_widgets.dart';
+import '../companion/medi_buddy_character.dart';
 
 class PunctalOcclusionScreen extends StatefulWidget {
   final String medicationName;
@@ -171,7 +171,7 @@ class _PunctalOcclusionScreenState extends State<PunctalOcclusionScreen> with Si
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '',
+                                '$_remainingSeconds',
                                 style: const TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.w900,
@@ -188,7 +188,26 @@ class _PunctalOcclusionScreenState extends State<PunctalOcclusionScreen> with Si
                 },
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // Pip the Droplet Guide Companion
+            Center(
+              child: MediBuddyCharacter(
+                mood: _remainingSeconds == 0
+                    ? MediBuddyMood.celebrating
+                    : _isRunning
+                        ? MediBuddyMood.dropletGuide
+                        : MediBuddyMood.encouraging,
+                outfit: MediBuddyOutfit.doctor,
+                size: 110,
+                customSpeechText: _remainingSeconds == 0
+                    ? 'Superb! Punctal occlusion complete. Medication safely absorbed in the eye!'
+                    : _isRunning
+                        ? 'Keep pressing gently on the inner corner of your tear duct. $_remainingSeconds seconds left!'
+                        : 'Ready? Place 1 drop, close your eyelid, and tap Start Occlusion!',
+              ),
+            ),
+            const SizedBox(height: 20),
 
             // Medication Context
             Container(
@@ -214,7 +233,7 @@ class _PunctalOcclusionScreenState extends State<PunctalOcclusionScreen> with Si
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(widget.medicationName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        Text('Target: ', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text('Target: ${widget.targetEye}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
                   ),

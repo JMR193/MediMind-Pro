@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../data/services/renal_hepatic_calculator_service.dart';
 import '../../core/one_ui_widgets.dart';
-import '../../core/apple_glass_decorations.dart';
 
 class RenalGuardScreen extends StatefulWidget {
   const RenalGuardScreen({super.key});

@@ -6,7 +6,6 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/clinical_vitals.dart';
 import '../../core/one_ui_widgets.dart';
 import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
 
 class VitalsTrackerScreen extends StatefulWidget {
   const VitalsTrackerScreen({super.key});

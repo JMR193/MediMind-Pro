@@ -6,13 +6,11 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../../domain/models/medication_log.dart';
 import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
 import '../../core/utils.dart';
 import '../medication_wizard/add_medication_screen.dart';
 import '../ocr_scanner/ocr_scanner_screen.dart';
-import '../emergency/sos_emergency_screen.dart';
 import '../medications/stock_out_alert_screen.dart';
-import '../reports/adherence_report_screen.dart';
+import '../reports/reports_screen.dart';
 
 class GuardianDashboardScreen extends StatefulWidget {
   const GuardianDashboardScreen({super.key});
@@ -243,7 +241,7 @@ class _GuardianDashboardScreenState extends State<GuardianDashboardScreen> {
                               ],
                             ),
                             TextButton(
-                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdherenceReportScreen())),
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Scaffold(appBar: AppBar(title: const Text('Adherence Report')), body: const ReportsScreen()))),
                               child: const Text('Detailed Report →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: guardianGreen)),
                             ),
                           ],

@@ -170,15 +170,13 @@ class ClinicalChartAssistantService {
         }
 
         // Calculate approximate drift from nearest scheduled hour
-        if (l.scheduledTime != null) {
-          final parts = l.scheduledTime!.split(':');
-          if (parts.length == 2) {
-            final schedH = int.tryParse(parts[0]) ?? hour;
-            final schedM = int.tryParse(parts[1]) ?? 0;
-            final schedTotalM = schedH * 60 + schedM;
-            final actualTotalM = l.timestamp.hour * 60 + l.timestamp.minute;
-            driftList.add((actualTotalM - schedTotalM).abs().toDouble());
-          }
+        final parts = l.scheduledTime.split(':');
+        if (parts.length == 2) {
+          final schedH = int.tryParse(parts[0]) ?? hour;
+          final schedM = int.tryParse(parts[1]) ?? 0;
+          final schedTotalM = schedH * 60 + schedM;
+          final actualTotalM = l.timestamp.hour * 60 + l.timestamp.minute;
+          driftList.add((actualTotalM - schedTotalM).abs().toDouble());
         }
       }
 
@@ -345,7 +343,7 @@ class ClinicalChartAssistantService {
     if (q.contains('summary') || q.contains('doctor') || q.contains('report') || q.contains('digest')) {
       return '📋 **Clinical Telemetry Digest for Doctor**:\n'
           '• Observation Window: ${report.dailyPoints.length} Days\n'
-          '• Mean Adherence Rate: **${report.overallAdherencePercent.toStringAsFixed(1)}%** (WHO Target $\\ge 80\\%$)\n'
+          '• Mean Adherence Rate: **${report.overallAdherencePercent.toStringAsFixed(1)}%** (WHO Target ≥ 80%)\n'
           '• Total Recorded Doses: ${report.totalDosesTaken} taken, ${report.totalDosesMissed} missed\n'
           '• Circadian Timing Stability: ±${report.timingJitterMinutes.toStringAsFixed(0)} min jitter\n'
           '• High-Reliability Medication: ${report.mostReliableMedication}\n'

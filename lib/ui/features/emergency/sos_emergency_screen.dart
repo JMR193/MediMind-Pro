@@ -87,7 +87,7 @@ class _SosEmergencyScreenState extends State<SosEmergencyScreen> with SingleTick
     );
 
     // Call caregiver or 911 if desired
-    if (primaryCaregiver?.phone != null && primaryCaregiver!.phone.isNotEmpty) {
+    if (primaryCaregiver?.phone != null && primaryCaregiver!.phone!.isNotEmpty) {
       final uri = Uri.parse('tel:${primaryCaregiver.phone}');
       canLaunchUrl(uri).then((can) {
         if (can) launchUrl(uri);
@@ -108,7 +108,8 @@ class _SosEmergencyScreenState extends State<SosEmergencyScreen> with SingleTick
     );
   }
 
-  void _dialNumber(String number) async {
+  void _dialNumber(String? number) async {
+    if (number == null || number.isEmpty) return;
     final clean = number.replaceAll(RegExp(r'[^0-9+]'), '');
     final uri = Uri.parse('tel:$clean');
     if (await canLaunchUrl(uri)) {

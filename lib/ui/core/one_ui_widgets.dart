@@ -128,6 +128,58 @@ class OneUiWidgets {
     );
   }
 
+  /// One UI Informational Banner Card
+  static Widget bannerCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    Color? accentColor,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+    final color = accentColor ?? theme.colorScheme.primary;
+
+    return squircleCard(
+      context: context,
+      onTap: onTap,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withAlpha(25),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurface.withAlpha(160),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Samsung One UI Quick Settings Pill Toggle
   static Widget quickSettingsPill({
     required BuildContext context,

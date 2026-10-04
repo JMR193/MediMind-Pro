@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../data/services/pharmacokinetic_simulator.dart';
 import '../../core/apple_glass_decorations.dart';

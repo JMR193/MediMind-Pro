@@ -210,3 +210,34 @@
    - 1-tap pre-formatted WhatsApp/SMS prescription replenishment request generator.
 5. **Full Unit Test Verification**:
    - `test/global_safety_and_travel_test.dart` passes with 100% green checkmarks across circadian phase shifts, narrow therapeutic index detections, and timezone calculations.
+
+### M. 3D Visual Suite, Procedural Mascot & Realistic Pharmaceutical Assets
+1. **Pervasive MediBuddy Pip Integration**:
+   - Empty State: Doctor Pip in `medications_list_screen.dart` with custom speech bubbles and animated bounce.
+   - Adherence Streak: Champion Pip with gold medal in `streak_screen.dart` celebrating streaks with confetti.
+   - Ringing Alarm: Doctor/Droplet Guide Pip in `medicine_alarm_dialog.dart` comforting patients alongside the ringing bell.
+   - Ophthalmic Coach: Droplet Guide Pip in `punctal_occlusion_screen.dart` guiding patients through 60s nasolacrimal compression.
+2. **Realistic 3D Medicine Card (`Realistic3dMedicineCard`)**:
+   - Procedural 2.5D/3D custom canvas shaders rendering photorealistic pharmaceutical assets without external 3D files.
+   - Capsule: Translucent bottom half with visible micro-pellets, specular glare, and separation rim.
+   - Scored Tablet: Chamfered beveled rim, radial illumination gradient, and debossed break lines.
+   - Dropper Bottle: Translucent glass body with dual-sine sloshing fluid wave physics and forming tip teardrop.
+   - Interactive micro-tilt on drag (`Matrix4` 3D perspective projection).
+   - Embedded into `VisualLabScreen` with real-time modal inspection (`Interactive3dPillViewer`).
+3. **Automated Verification**:
+   - Complete test suite in `test/realistic_3d_visuals_test.dart` covering 3D cards, viewport rendering, and character moods.
+
+### N. Global Research, Enterprise PRD & Systems Architecture Milestone
+1. **Authoritative `PRD.md` Created**:
+   - 20 Functional Requirements (FR-01 to FR-20) covering Regimen Management, 4-Slot Pillbox, Ophthalmic Spacing, Digital Twin PK, Chronotherapy, Beers Criteria, Travel Dose Shifter, Safety Scanner, ICE Paramedic HUD, Refill Cliff Forecaster, and 3D Visuals.
+   - 6 Key Clinical & Patient Personas (Polypharmacy Senior, Family Guardian, Global Traveler, Specialist Physician, Paramedic, Pharmacist).
+   - Regulatory alignment with FDA SaMD Class I (CDS Exemption), HIPAA 45 CFR § 164, GDPR Article 17, and WCAG 2.1 Level AAA.
+2. **Authoritative `ARCHITECTURE.md` Created**:
+   - Systems topology combining Clean Architecture, Unidirectional Data Flow, and an Offline-First Local Vault.
+   - Resilient Storage Engine featuring Write-Ahead Logging (WAL) and atomic `.tmp` replace file commits.
+   - HL7 FHIR R4 standard schema compliance (`MedicationRequest`, `MedicationStatement`, `MedicationAdministration`).
+   - Deep mathematical formulations for Bateman 1-Compartment PK Accumulation ODEs, ISPOR PDC (CMA-3) adherence, and trans-meridian circadian phase shifts.
+   - Background exact alarm dispatch bypassing Android 14 Doze mode and OEM task killers (Samsung, Xiaomi, Huawei).
+3. **Static Analysis & Code Quality Certified**:
+   - All legacy and newly introduced type issues, null safety edge cases, and unused directives resolved (`dart analyze lib/` verified with 0 errors).
+

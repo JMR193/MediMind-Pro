@@ -4,7 +4,6 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../data/services/circadian_travel_service.dart';
 import '../../../domain/models/medication.dart';
 import '../../core/apple_glass_decorations.dart';
-import '../../core/theme.dart';
 
 class TravelDoseShifterScreen extends StatefulWidget {
   const TravelDoseShifterScreen({super.key});
@@ -20,7 +19,7 @@ class _TravelDoseShifterScreenState extends State<TravelDoseShifterScreen> {
   GlobalTimeZone _destination = GlobalTimeZone.majorTimeZones[6]; // Paris (CET, +1)
   Medication? _selectedMedication;
   TimeOfDay _originTime = const TimeOfDay(hour: 8, minute: 0);
-  DateTime _departureDate = DateTime.now().add(const Duration(days: 1));
+  final DateTime _departureDate = DateTime.now().add(const Duration(days: 1));
   CircadianTravelPlan? _activePlan;
 
   @override

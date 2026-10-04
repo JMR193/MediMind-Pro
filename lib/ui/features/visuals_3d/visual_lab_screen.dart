@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../../domain/models/medication.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../companion/medi_buddy_character.dart';
 import 'animated_water_wave_tracker.dart';
 import 'interactive_3d_pill_viewer.dart';
 import 'ophthalmic_3d_drop_simulator.dart';
+import 'realistic_3d_medicine_card.dart';
 
 class VisualLabScreen extends StatefulWidget {
   const VisualLabScreen({super.key});
@@ -113,6 +115,74 @@ class _VisualLabScreenState extends State<VisualLabScreen>
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Realistic 3D Pharmaceutical Cards Showcase
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Realistic 3D Medication Cards',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Interactive micro-tilt on drag, procedural 3D specular rendering & fluid dynamics:',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Realistic3dMedicineCard(
+            medication: Medication(
+              id: 'sample_tab',
+              name: 'Atorvastatin Calcium',
+              strength: '20 mg',
+              category: MedCategory.oral,
+              dosageUnit: DosageUnit.tablets,
+              dosageAmount: 1,
+              instruction: AdminInstruction.atBedtime,
+              scheduleTimes: ['21:00'],
+              totalInventoryCount: 28,
+              refillThreshold: 7,
+              colorHex: '#0284C7',
+              iconName: 'tablet',
+            ),
+          ),
+          Realistic3dMedicineCard(
+            medication: Medication(
+              id: 'sample_cap',
+              name: 'Amoxicillin Trihydrate',
+              strength: '500 mg',
+              category: MedCategory.oral,
+              dosageUnit: DosageUnit.capsules,
+              dosageAmount: 1,
+              instruction: AdminInstruction.withMeal,
+              scheduleTimes: ['08:00', '14:00', '20:00'],
+              totalInventoryCount: 14,
+              refillThreshold: 5,
+              colorHex: '#F43F5E',
+              iconName: 'capsule',
+            ),
+          ),
+          Realistic3dMedicineCard(
+            medication: Medication(
+              id: 'sample_drop',
+              name: 'Timolol Maleate Ophthalmic',
+              strength: '0.5%',
+              category: MedCategory.eyeDrop,
+              dosageUnit: DosageUnit.drops,
+              dosageAmount: 1,
+              instruction: AdminInstruction.beforeMeal,
+              scheduleTimes: ['08:00', '20:00'],
+              totalInventoryCount: 5,
+              refillThreshold: 10,
+              colorHex: '#7C3AED',
+              iconName: 'eye_drop',
             ),
           ),
         ],

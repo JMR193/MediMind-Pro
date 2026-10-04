@@ -424,9 +424,6 @@ class _Pill3dPainter extends CustomPainter {
 
   void _draw3dScoredTablet(Canvas canvas, double cx, double cy, double radius) {
     // 3D Scored Circular Tablet with Chamfer Rim
-    final lightShiftX = math.sin(rotY) * (radius * 0.3);
-    final lightShiftY = math.cos(rotX) * (radius * 0.3);
-
     // Outer Rim (Chamfered Bevel)
     final bevelPaint = Paint()
       ..shader = RadialGradient(
@@ -543,7 +540,6 @@ class _Pill3dPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(bodyRect, const Radius.circular(16)), bottlePaint);
 
     // 2. Liquid Meniscus Level inside bottle (reacts to rotY tilt!)
-    final liquidH = bodyH * 0.55;
     final liquidTilt = math.sin(rotY) * 12;
     final liquidPath = Path()
       ..moveTo(cx - r + 3, cy + bodyH * 0.25 + liquidTilt)
