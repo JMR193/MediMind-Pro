@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication_log.dart';
 import '../companion/medi_buddy_character.dart';
+import 'lotus_bloom_widget.dart';
 import '../../core/theme.dart';
 
 class StreakScreen extends StatefulWidget {
@@ -80,7 +81,76 @@ class _StreakScreenState extends State<StreakScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+
+                // Mindful Lotus Bloom Habit Progression (Matching Image 1)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1B1834),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFC026D3).withOpacity(0.18),
+                        blurRadius: 20,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Mindful Habit Garden',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFC026D3).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              streak.currentStreak < 4
+                                  ? 'Stage 1: BUD'
+                                  : streak.currentStreak < 14
+                                      ? 'Stage 2: BLOOMING'
+                                      : 'Stage 3: BLOSSOM',
+                              style: const TextStyle(
+                                color: Color(0xFFF472B6),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      LotusBloomWidget(
+                        stage: streak.currentStreak < 4
+                            ? LotusStage.bud
+                            : streak.currentStreak < 14
+                                ? LotusStage.blooming
+                                : LotusStage.blossom,
+                        size: 160,
+                        animate: true,
+                        subtitle: streak.currentStreak < 4
+                            ? 'Your adherence journey is budding! Keep going to open new petals.'
+                            : streak.currentStreak < 14
+                                ? 'Your lotus is blooming as daily habits take deep root!'
+                                : 'Mastery achieved! Your adherence flower is in full radiance.',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
                 // Monthly Calendar View with Dots for Taken/Skipped
                 Card(
                   child: Padding(

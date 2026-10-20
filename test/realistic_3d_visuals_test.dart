@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:medication_reminder/domain/models/medication.dart';
-import 'package:medication_reminder/ui/features/companion/medi_buddy_character.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/interactive_3d_pill_viewer.dart';
-import 'package:medication_reminder/ui/features/visuals_3d/realistic_3d_medicine_card.dart';
+import 'package:medimind_app/domain/models/medication.dart';
+import 'package:medimind_app/ui/features/companion/medi_buddy_character.dart';
+import 'package:medimind_app/ui/features/visuals_3d/interactive_3d_pill_viewer.dart';
+import 'package:medimind_app/ui/features/visuals_3d/realistic_3d_medicine_card.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

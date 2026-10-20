@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -97,7 +98,7 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
     );
 
-    _startRandomBlinking();
+    _scheduleNextBlink();
 
     // Tap bounce animation
     _tapBounceController = AnimationController(
@@ -124,16 +125,21 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
     }
   }
 
-  void _startRandomBlinking() async {
-    while (mounted) {
-      final delay = 2500 + math.Random().nextInt(3500);
-      await Future.delayed(Duration(milliseconds: delay));
-      if (!mounted) break;
-      if (widget.mood != MediBuddyMood.sleeping) {
-        await _blinkController.forward();
-        await _blinkController.reverse();
+  Timer? _blinkTimer;
+
+  void _scheduleNextBlink() {
+    if (!mounted) return;
+    final delay = 2500 + math.Random().nextInt(3500);
+    _blinkTimer = Timer(Duration(milliseconds: delay), () async {
+      if (!mounted) return;
+      if (widget.mood != MediBuddyMood.sleeping && !_blinkController.isAnimating) {
+        try {
+          await _blinkController.forward();
+          if (mounted) await _blinkController.reverse();
+        } catch (_) {}
       }
-    }
+      _scheduleNextBlink();
+    });
   }
 
   @override
@@ -146,6 +152,8 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
 
   @override
   void dispose() {
+    _blinkTimer?.cancel();
+    _blinkTimer = null;
     _idleController.dispose();
     _blinkController.dispose();
     _tapBounceController.dispose();
@@ -220,33 +228,69 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
                 scaleX: bounce * squash,
                 scaleY: bounce / squash,
                 alignment: Alignment.bottomCenter,
-                child: SizedBox(
-                  width: widget.size,
-                  height: widget.size * 1.15,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Confetti / Aura particles for celebrating mood
-                      if (widget.mood == MediBuddyMood.celebrating)
-                        _buildCelebrationParticles(),
-
-                      // Sleeping Zzz bubbles
-                      if (widget.mood == MediBuddyMood.sleeping)
-                        _buildSleepingZzz(),
-
-                      // Procedural Vector Character Canvas
-                      CustomPaint(
-                        size: Size(widget.size, widget.size * 1.15),
-                        painter: _MediBuddyPainter(
-                          mood: widget.mood,
-                          outfit: widget.outfit,
-                          blinkProgress: _blinkAnim.value,
-                          lookDirection: _lookDirection,
-                          idleProgress: _idleController.value,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.customSpeechText != null &&
+                        widget.customSpeechText!.isNotEmpty) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Theme.of(context).dividerColor.withOpacity(0.4),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          widget.customSpeechText!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.bodyMedium?.color,
+                          ),
                         ),
                       ),
                     ],
-                  ),
+                    SizedBox(
+                      width: widget.size,
+                      height: widget.size * 1.15,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Confetti / Aura particles for celebrating mood
+                          if (widget.mood == MediBuddyMood.celebrating)
+                            _buildCelebrationParticles(),
+
+                          // Sleeping Zzz bubbles
+                          if (widget.mood == MediBuddyMood.sleeping)
+                            _buildSleepingZzz(),
+
+                          // Procedural Vector Character Canvas
+                          CustomPaint(
+                            size: Size(widget.size, widget.size * 1.15),
+                            painter: _MediBuddyPainter(
+                              mood: widget.mood,
+                              outfit: widget.outfit,
+                              blinkProgress: _blinkAnim.value,
+                              lookDirection: _lookDirection,
+                              idleProgress: _idleController.value,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

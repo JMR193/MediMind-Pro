@@ -35,10 +35,12 @@ class MedicationRepository extends ChangeNotifier {
   EyeDropProtocolSession? _activeEyeDropSession;
 
   MedicationRepository({
-    required this._storageService,
-    required this._notificationService,
-    required this._taskerService,
-  }) {
+    required StorageService storageService,
+    required NotificationService notificationService,
+    required TaskerService taskerService,
+  })  : _storageService = storageService,
+        _notificationService = notificationService,
+        _taskerService = taskerService {
     _initData();
   }
 

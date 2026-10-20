@@ -46,6 +46,7 @@ import '../emergency_hud/universal_emergency_hud_screen.dart';
 import '../refill_forecast/refill_forecast_screen.dart';
 import '../safety_scanner/medication_safety_scanner_screen.dart';
 import '../travel/travel_dose_shifter_screen.dart';
+import 'modern_healthcare_dashboard_view.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -68,6 +69,10 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Modern Healthcare AI Dashboard View (Matching Image 3 Screen 1)
+              const ModernHealthcareDashboardView(),
+              const SizedBox(height: 16),
+
               // Apple iOS 18 Dynamic Island Pill
               if (settings.dynamicIslandEnabled) ...[
                 const DynamicIslandPill(),

@@ -4,6 +4,8 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../core/utils.dart';
 import '../../core/theme.dart';
+import '../visuals_3d/realistic_3d_medicine_card.dart';
+import 'medication_detail_specs_screen.dart';
 import '../companion/medi_buddy_character.dart';
 import '../medication_wizard/add_medication_screen.dart';
 
@@ -52,7 +54,7 @@ class MedicationsListScreen extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: meds.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
           itemBuilder: (context, i) => _MedCard(medication: meds[i], repo: repo),
         );
       },
@@ -70,21 +72,33 @@ class _MedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final med = medication;
     final color = hexToColor(med.colorHex);
-    final icon = getMedicationIcon(med.iconName);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: color.withAlpha(38), borderRadius: BorderRadius.circular(14)),
-                  child: Icon(icon, color: color, size: 26),
-                ),
-                const SizedBox(width: 14),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MedicationDetailSpecsScreen(medication: med),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: 52,
+                    height: 52,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Realistic3dMedicineCard(medication: med),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,6 +174,7 @@ class _MedCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

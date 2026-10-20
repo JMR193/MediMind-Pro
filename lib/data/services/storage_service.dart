@@ -33,8 +33,10 @@ class StorageService {
   // Medication persistence
   Future<void> saveMedications(List<Medication> meds) async {
     final listJson = meds.map((m) => m.toJson()).toList();
-    await _prefs.setString(_medsKey, jsonEncode(listJson));
-    ResilientStorageEngine().commitTable('medications', listJson);
+    await Future.wait([
+      _prefs.setString(_medsKey, jsonEncode(listJson)),
+      ResilientStorageEngine().commitTable('medications', listJson),
+    ]);
   }
 
   List<Medication> loadMedications() {
@@ -51,8 +53,10 @@ class StorageService {
   // Logs persistence
   Future<void> saveLogs(List<MedicationLog> logs) async {
     final listJson = logs.map((l) => l.toJson()).toList();
-    await _prefs.setString(_logsKey, jsonEncode(listJson));
-    ResilientStorageEngine().commitTable('logs', listJson);
+    await Future.wait([
+      _prefs.setString(_logsKey, jsonEncode(listJson)),
+      ResilientStorageEngine().commitTable('logs', listJson),
+    ]);
   }
 
   List<MedicationLog> loadLogs() {
@@ -103,8 +107,10 @@ class StorageService {
 
   Future<void> saveProfiles(List<UserProfile> profiles) async {
     final listJson = profiles.map((p) => p.toJson()).toList();
-    await _prefs.setString(_profilesKey, jsonEncode(listJson));
-    ResilientStorageEngine().commitTable('profiles', listJson);
+    await Future.wait([
+      _prefs.setString(_profilesKey, jsonEncode(listJson)),
+      ResilientStorageEngine().commitTable('profiles', listJson),
+    ]);
   }
 
   List<UserProfile> loadProfiles() {

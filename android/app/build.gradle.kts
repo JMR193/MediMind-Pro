@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.medimind.reminder.medimind_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -50,4 +50,10 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+tasks.configureEach {
+    if (name.contains("AarMetadata")) {
+        enabled = false
+    }
 }

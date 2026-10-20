@@ -196,7 +196,7 @@ class DigitalPillboxScreen extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(12),
               itemCount: medications.length,
-              separatorBuilder: (_, _) => const Divider(height: 12),
+              separatorBuilder: (_, __) => const Divider(height: 12),
               itemBuilder: (context, idx) {
                 final med = medications[idx];
                 return Row(

@@ -204,7 +204,7 @@ class _UniversalEmergencyHudScreenState extends State<UniversalEmergencyHudScree
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _languages.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final l = _languages[i];
           final isSelected = l.code == _selectedLang.code;

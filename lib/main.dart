@@ -11,7 +11,6 @@ import 'domain/models/app_settings.dart';
 import 'ui/core/theme.dart';
 import 'ui/features/dashboard/dashboard_screen.dart';
 import 'ui/features/medications/medications_list_screen.dart';
-import 'ui/features/reports/reports_screen.dart';
 import 'ui/features/tasker_automation/tasker_screen.dart';
 import 'ui/features/medication_wizard/add_medication_screen.dart';
 import 'ui/features/settings/settings_screen.dart';
@@ -36,6 +35,9 @@ import 'ui/features/pill_identifier/pill_identifier_screen.dart';
 import 'ui/features/compliance/compliance_screen.dart';
 import 'ui/features/qr_share/qr_code_share_screen.dart';
 import 'ui/core/in_app_notification_overlay.dart';
+import 'ui/core/floating_pill_nav_bar.dart';
+import 'ui/features/reports/intake_history_screen.dart';
+import 'ui/features/onboarding/lotus_onboarding_screen.dart';
 
 import 'data/services/device_integration_service.dart';
 
@@ -138,11 +140,11 @@ class _MainShellState extends State<MainShell> {
   final _pages = const [
     DashboardScreen(),
     MedicationsListScreen(),
-    ReportsScreen(),
     TaskerScreen(),
+    IntakeHistoryScreen(),
   ];
 
-  final _titles = ['Today\'s Dashboard', 'My Medications', 'Reports & Analytics', 'Smart Automation'];
+  final _titles = ['Today\'s Dashboard', 'My Medications', 'Smart Automation', 'Intake History'];
 
   @override
   Widget build(BuildContext context) {
@@ -187,46 +189,22 @@ class _MainShellState extends State<MainShell> {
       ),
       floatingActionButton: _currentIndex == 1
           ? FloatingActionButton.extended(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddMedicationScreen())),
+              onPressed: () => _showAddActionSheet(context),
               icon: const Icon(Icons.add),
-              label: const Text('Add Medication'),
+              label: const Text('Add / Record'),
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
             )
-          : _currentIndex == 0
-              ? FloatingActionButton(
-                  onPressed: () => _showAddActionSheet(context),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  child: const Icon(Icons.add),
-                )
-              : null,
-      bottomNavigationBar: NavigationBar(
+          : null,
+      bottomNavigationBar: FloatingPillNavBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        indicatorColor: Theme.of(context).colorScheme.primary.withAlpha(38),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Today',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.medication_outlined),
-            selectedIcon: Icon(Icons.medication),
-            label: 'Medications',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.analytics_outlined),
-            selectedIcon: Icon(Icons.analytics),
-            label: 'Reports',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.smart_toy_outlined),
-            selectedIcon: Icon(Icons.smart_toy),
-            label: 'Automation',
-          ),
-        ],
+        onItemSelected: (i) => setState(() => _currentIndex = i),
+        onAiPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AiAssistantScreen()),
+          );
+        },
       ),
     );
   }
@@ -412,6 +390,15 @@ class _MainShellState extends State<MainShell> {
             onTap: () {
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (_) => const ComplianceScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.spa_outlined, color: Color(0xFF2D6A4F)),
+            title: const Text('Mindful Habit Tour'),
+            subtitle: const Text('Explore the 3-stage lotus bloom journey'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (ctx) => LotusOnboardingScreen(onFinish: () => Navigator.pop(ctx))));
             },
           ),
           const Divider(),

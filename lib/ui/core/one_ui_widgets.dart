@@ -66,7 +66,7 @@ class OneUiWidgets {
                     ],
                   ),
                 ),
-                ?trailing,
+                if (trailing != null) trailing,
               ],
             ),
           ],

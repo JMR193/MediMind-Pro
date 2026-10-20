@@ -468,6 +468,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
         ),
         if (messages.isEmpty)
           _buildQuickQuestionChips(),
+        _buildQuickActionPills(),
         if (_isListening)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -483,6 +484,32 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
           ),
         _buildInputBar(service),
       ],
+    );
+  }
+
+  Widget _buildQuickActionPills() {
+    final actions = [
+      ('Move Reminder', Icons.calendar_today_outlined),
+      ('Create Routine', Icons.event_note_outlined),
+      ('Set Smart Alert', Icons.notifications_active_outlined),
+      ('Check Interactions', Icons.health_and_safety_outlined),
+    ];
+    return Container(
+      height: 40,
+      margin: const EdgeInsets.only(bottom: 6),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: actions.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, i) => ActionChip(
+          avatar: Icon(actions[i].$2, size: 14, color: const Color(0xFF2D6A4F)),
+          label: Text(actions[i].$1, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2D6A4F))),
+          backgroundColor: const Color(0xFFD8F3DC),
+          side: const BorderSide(color: Color(0xFFB7E4C7)),
+          onPressed: () => _send('Help me with: ${actions[i].$1}'),
+        ),
+      ),
     );
   }
 
@@ -531,7 +558,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> with SingleTicker
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _quickQuestions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) => ActionChip(
           label: Text(_quickQuestions[i], style: const TextStyle(fontSize: 12)),
           onPressed: () => _send(_quickQuestions[i]),
