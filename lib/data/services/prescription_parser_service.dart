@@ -326,6 +326,40 @@ class PrescriptionParserService {
     'ganciclovir': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Zirgan ophthalmic gel: For viral keratitis.'),
     'zovirax ointment': (category: MedCategory.eyeOintment, unit: DosageUnit.applyTopical, isEye: true, isOintment: true, isNti: false, chrono: 'Acyclovir 3% eye ointment: Apply 5 times daily for herpes keratitis.'),
 
+    // 🔬 Glaucoma Advanced Subspecialty Formulations
+    'betaxolol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Betoptic: Cardioselective beta-1 blocker. Apply 60s punctal occlusion.'),
+    'betoptic': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Cardioselective beta-1 blocker. Twice daily.'),
+    'levobunolol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Betagan: Non-selective beta blocker. Apply punctal occlusion.'),
+    'betagan': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Apply 60s punctal occlusion.'),
+    'carteolol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Ocupress: Beta blocker with intrinsic sympathomimetic activity.'),
+    'apraclonidine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Iopidine: Alpha-2 agonist for acute IOP post-laser spike prevention.'),
+    'iopidine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Alpha-2 agonist. Short-term use to avoid tachyphylaxis.'),
+    'ripasudil': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Glanatec: Rho-kinase (ROCK) inhibitor for trabecular outflow enhancement.'),
+    'glanatec': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Twice daily. Transient conjunctival hyperemia is common.'),
+    'methazolamide': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Oral carbonic anhydrase inhibitor. Space evenly with water.'),
+
+    // 🔬 Cornea, Keratopathy & Ocular Surface Subspecialty Formulations
+    'muro 128': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Sodium Chloride 5% hypertonic solution: For corneal edema / Fuchs dystrophy.'),
+    'amphotericin b': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Compounded antifungal 0.15% for Candida/Aspergillus keratitis. Keep refrigerated.'),
+    'trifluridine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Viroptic 1%: Administer every 2 hours while awake for HSV epithelial keratitis.'),
+    'viroptic': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Antiviral eye drops. Administer every 2 hours while awake.'),
+    'tacrolimus': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Topical calcineurin inhibitor 0.03% for graft rejection & severe vernal keratoconjunctivitis.'),
+    'thealoz duo': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Trehalose + Sodium Hyaluronate bioprotectant. Use PRN.'),
+    'trehalose': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Osmoprotective tear lubricant. Use PRN.'),
+
+    // 🔬 Retina & Posterior Segment Subspecialty Formulations
+    'areds 2': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: false, chrono: 'AREDS 2 Macular Formula (Lutein, Zeaxanthin, Vit C/E, Zinc). Take with morning & evening meal.'),
+    'preservision': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: false, chrono: 'AREDS 2 formula: Take with food twice daily to prevent AMD progression.'),
+    'ocuvite': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: false, chrono: 'Ocular antioxidant supplement. Take with meal.'),
+    'triamcinolone': (category: MedCategory.injectable, unit: DosageUnit.units, isEye: true, isOintment: false, isNti: true, chrono: 'Intravitreal corticosteroid. Monitor post-injection intraocular pressure.'),
+    'ozurdex': (category: MedCategory.injectable, unit: DosageUnit.units, isEye: true, isOintment: false, isNti: true, chrono: 'Dexamethasone intravitreal implant for retinal vein occlusion macular edema.'),
+
+    // 🔬 Orbit, Oculoplastics & Blepharitis Subspecialty Formulations
+    'teprotumumab': (category: MedCategory.injectable, unit: DosageUnit.units, isEye: false, isOintment: false, isNti: true, chrono: 'Tepezza: IGF-1R inhibitor IV infusion for Thyroid Eye Disease proptosis.'),
+    'tepezza': (category: MedCategory.injectable, unit: DosageUnit.units, isEye: false, isOintment: false, isNti: true, chrono: 'Infusion every 3 weeks for active Thyroid Eye Disease.'),
+    'azasite': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Azithromycin 1% in DuraSite vehicle for bacterial conjunctivitis & blepharitis.'),
+    'bacitracin': (category: MedCategory.eyeOintment, unit: DosageUnit.applyTopical, isEye: true, isOintment: true, isNti: false, chrono: 'Apply along eyelid margin or surgical incision before bedtime.'),
+
     // ❤️ Anticoagulation & Antiplatelets (Narrow Therapeutic Index)
     'warfarin': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Take at 18:00 (evening) consistently. Maintain stable Vitamin K intake.'),
     'coumadin': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Take at 18:00 consistently.'),
@@ -1042,12 +1076,14 @@ class PrescriptionParserService {
       'pulse:', 'spo2:', 'date:', 'reg no', 'registration', 'opd', 'ipd',
       'signature', 'rx', 'r/', 'phone:', 'ph:', 'address', 'tel:',
       'consultant', 'department', 'investigations', 'diagnosis', 'chief complaint',
-      'follow up', 'next visit',
+      'follow up', 'next visit', 'service', 'practice', 'institute', 'center', 'centre',
     ];
     for (final kw in noiseKeywords) {
-      if (lower.startsWith(kw) || (lower.contains(kw) && line.length < 35)) {
-        // If line contains a known medication name from dictionary, do not filter out!
-        final containsKnownDrug = _drugDictionary.keys.any((k) => lower.contains(k));
+      if (lower.startsWith(kw) || (lower.contains(kw) && line.length < 55)) {
+        // If line contains a whole-word known medication name from dictionary, do not filter out!
+        final containsKnownDrug = _drugDictionary.keys.any(
+          (k) => RegExp(r'\b' + RegExp.escape(k) + r'\b', caseSensitive: false).hasMatch(lower),
+        );
         if (!containsKnownDrug) return true;
       }
     }
@@ -1177,8 +1213,8 @@ class PrescriptionParserService {
       title: '👁️ Post-Cataract Phacoemulsification Regimen',
       subtitle: 'Post-op drops with weekly steroid taper (4-3-2-1) & washout spacing',
       text: '''
-ARAVIND EYE CARE SYSTEM & POST-OP CLINIC
-Dr. R. Venkatesh, MS, DO (Senior Cataract Surgeon)
+CLINICAL OPHTHALMOLOGY & POST-SURGICAL CARE SERVICE
+Dr. R. Venkatesh, MS (Senior Ophthalmic Surgeon)
 Patient: Sundaram K. | Age: 68 | Eye: Left Eye (OS)
 Procedure: Phacoemulsification with Foldable IOL (Left Eye)
 
@@ -1191,10 +1227,10 @@ Rx (Left Eye / OS):
 '''
     ),
     (
-      title: '👁️ Glaucoma Multidrop & IOP Control Protocol',
+      title: '👁️ Glaucoma Multidrop & Target-IOP Protocol',
       subtitle: 'Timolol, Dorzolamide & Bedtime Latanoprost with Punctal Occlusion',
       text: '''
-WILLS EYE HOSPITAL - GLAUCOMA SERVICE
+SPECIALTY GLAUCOMA CONSULTING & RESEARCH SERVICE
 Dr. Jonathan Myers, MD
 Patient: Harold Green | Age: 71 | Diagnosis: POAG
 Target Eye: Both Eyes (OU)
@@ -1207,26 +1243,43 @@ Rx:
 '''
     ),
     (
-      title: '👁️ Ophthalmic & Post-Cataract Surgery Rx',
-      subtitle: '4 eye drops & ointment with 5-10m wash-out warning',
+      title: '👁️ Retina & Vitreoretinal Post-Op Care',
+      subtitle: 'Post-Vitrectomy antibiotic, cycloplegic, steroid & AREDS 2 formula',
       text: '''
-DR. SARAH LIN, MD, FRCS (Ophthalmology)
-ST. MARY EYE HOSPITAL & RETINA CENTER
+VITREORETINAL SURGICAL & MACULAR CARE SERVICE
+Dr. Sarah Lin, MD, FRCS (Retina Specialist)
 Patient: Robert Vance | Age: 64 | Eye: Right Eye (OD)
+Procedure: Pars Plana Vitrectomy with Gas Tamponade
 
-Rx:
+Rx (Right Eye / OD):
 1. Moxifloxacin 0.5% Eye Drops (Vigamox) - 1 drop 4 times daily (OD) x 14 days
-2. Pred Forte 1% Ophthalmic Suspension - 1 drop TID (OD) x 2 weeks
-3. Latanoprost 0.005% Eye Drops - 1 drop at bedtime (OU) continue 30 days
-4. Erythromycin 0.5% Eye Ointment - Apply thin ribbon at bedtime (OD) x 10 days
-(Wait 10 minutes after liquid drops before applying ointment)
+2. Pred Forte 1% Ophthalmic Suspension - 1 drop TID (OD) x 21 days
+3. Atropine 1% Eye Drops - 1 drop twice daily BD (OD) x 10 days
+4. PreserVision AREDS 2 Formula - 1 tablet twice daily with meals x 90 days
+(Maintain prone / face-down positioning as instructed. Space eye drops 5 minutes apart.)
+'''
+    ),
+    (
+      title: '👁️ Cornea, Keratitis & Ocular Surface Protocol',
+      subtitle: 'Intensive antimicrobial & hypertonic drops for corneal edema',
+      text: '''
+CORNEAL & ANTERIOR SEGMENT SPECIALTY PRACTICE
+Dr. Elena Rostova, MD (Cornea Specialist)
+Patient: Clara Bennett | Age: 54 | Eye: Right Eye (OD)
+
+Rx (Right Eye / OD):
+1. Natamycin 5% Eye Drops - 1 drop every 1 hour (Q1H) x 7 days
+2. Besivance 0.6% Eye Suspension - 1 drop every 2 hours (Q2H) x 7 days
+3. Homatropine 2% Eye Drops - 1 drop 3 times daily TID (OD) x 10 days
+4. Muro 128 Eye Drops (Sodium Chloride 5%) - 1 drop 4 times daily QID x 30 days
+(Shake suspensions vigorously for 15s. Space each medication by at least 5 minutes.)
 '''
     ),
     (
       title: '🩺 Outpatient General Clinic Prescription',
       subtitle: 'Oral medications with Indian matrix (1-0-1, 1-0-0) & days',
       text: '''
-METRO HEALTH CLINIC & DIAGNOSTICS
+PRIMARY AMBULATORY CARE & CLINICAL DIAGNOSTICS
 Dr. Rajesh Sharma, MBBS, MD (Internal Medicine)
 Patient: Anita Patel | Date: Today | BP: 128/82
 
@@ -1241,7 +1294,7 @@ Rx:
       title: '❤️ Chronic Cardio-Diabetic Routine',
       subtitle: 'Maintenance medications with statin & metformin timing',
       text: '''
-CARDIO-ENDOCRINE SPECIALTY CARE
+CARDIO-ENDOCRINE CLINICAL CARE
 Dr. David Miller, MD
 Patient: Thomas Reed | Age: 58
 
@@ -1256,7 +1309,7 @@ Prescription:
       title: '⚡ Complex Polypharmacy & High Bleed Risk',
       subtitle: 'Warfarin + Aspirin DDI & Thyroxine Fasting Schedule',
       text: '''
-ROYAL HEALTHCARE ADVANCED GERIATRIC WARD
+ADVANCED GERIATRIC & CARDIOVASCULAR CARE SERVICE
 Dr. Amanda Brooks, MD (Cardiology & Geriatrics)
 Patient: Evelyn Wright | Age: 72
 

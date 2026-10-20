@@ -286,19 +286,21 @@
 7. **Automated Verification**:
    - Complete 6-scenario unit test suite in `test/prescription_understanding_test.dart` passes with 100% green checkmarks.
 
-### Q. Eye Hospital & Post-Operative Ophthalmic Clinical Hub (`EyeHospitalPostOpHub`)
+### Q. Ophthalmic Specialty & Post-Operative Clinical Center (`EyeHospitalPostOpHub`)
 1. **Clinical Formulation Administration Ladder**:
    - Sequences drops strictly by physical formulation:
      1. Clear Solutions (Fastest corneal absorption without barrier)
      2. Suspensions (Vigorous 10-15s shaking reminder: Pred Forte, Nevanac, Azopt, Besivance)
      3. Emulsions (Milky drops: Durezol, Restasis)
      4. Gels (Viscous drops: Viscotears, Zirgan)
-     5. Ointments (Last at bedtime: Tobradex ointment, Erythromycin, Lacri-Lube)
-2. **Authentic Eye Hospital Preset Regimens (1-Tap Import)**:
-   - **Post-Cataract Phacoemulsification**: Moxifloxacin 0.5% + Pred Forte 1% (4-3-2-1 taper) + Nevanac 0.1% + Refresh Tears (Aravind / Sankara Nethralaya protocol).
-   - **Fixed-Dose Post-Cataract Combo**: Moxicip D (Moxi + Dexa) + Nevanac + Vismed (reduces bottle count).
-   - **Wills Eye Hospital Glaucoma Protocol**: Cosopt (Dorzolamide/Timolol) + Alphagan + Xalatan (Bedtime).
-   - **Post-LASIK & PRK Surface Protocol**: Moxifloxacin + Fluorometholone (FML) + Preservative-Free Tears.
+     5. Ointments (Last at bedtime: Tobradex ointment, Erythromycin, Lacri-Lube, Bacitracin)
+2. **Specialty Preset Regimens (1-Tap Import — Zero Hospital Names / Pure Clinical Subspecialties)**:
+   - **Cornea & Anterior Segment Protocol**: Moxifloxacin 0.5% + Pred Forte 1% (4-3-2-1 taper) + Nevanac 0.1% + Sodium Hyaluronate 0.1% PF (Post-Phaco & Keratoplasty).
+   - **Post-Cataract Fixed-Dose Combo**: Moxicip D (Moxi + Dexa) + Nevanac + Vismed (reduces bottle count).
+   - **Glaucoma Target-IOP Protocol**: Cosopt (Dorzolamide/Timolol) + Alphagan + Xalatan (Bedtime).
+   - **Corneal Refractive (LASIK/PRK) Surface Protocol**: Moxifloxacin + Fluorometholone (FML) + Preservative-Free Tears.
+   - **Retina & Vitreoretinal Post-Vitrectomy Protocol**: Moxifloxacin + Pred Forte + Atropine 1% (Cycloplegic) + AREDS 2 Antioxidant Formula.
+   - **Orbit & Oculoplastics Eyelid Care Protocol**: Tobradex (Tobramycin/Dexamethasone) + Bacitracin Ophthalmic Ointment (Bedtime) + Artificial Tears.
 3. **Automated 4-Week Steroid Taper Builder & Tracker**:
    - Detects `4-3-2-1`, `weekly taper`, `then TID` in prescription scans.
    - Automatically builds a 4-step `ClinicalTaperPlan` (Week 1: 4x/d $\rightarrow$ Week 2: 3x/d $\rightarrow$ Week 3: 2x/d $\rightarrow$ Week 4: 1x/d $\rightarrow$ Stop).
@@ -307,11 +309,13 @@
    - Never rub operative eye (incision / flap integrity).
    - Avoid tap water in eyes for 7-14 days.
    - Avoid heavy lifting (>5 kg) or bending to prevent IOP spikes.
-   - Emergency RSVP Red-Flag Triage (Redness, Sensitivity to light, Vision loss, throbbing Pain) with speed-dial to emergency eye dispatch.
+   - Emergency RSVP Red-Flag Triage (Redness, Sensitivity to light, Vision loss, throbbing Pain) with speed-dial to emergency clinical eye care.
 5. **Washout Spacing & Punctal Occlusion**:
    - Active 5-minute spacing timer between sequential eye drops.
    - 60-second guided Punctal Occlusion coach for Timolol and beta-blockers.
-6. **Automated Verification**:
-   - `test/eye_hospital_prescriptions_test.dart` passes with 100% green checkmarks across 6 clinical scenarios.
+6. **Zero Proprietary Hospital Names Compliance**:
+   - To prevent IP, trademark, or false affiliation issues, zero real-world hospital names are permitted in UI strings, preset titles, mock prescriptions, or documentation. Pure anatomical and subspecialty clinical categorizations are used exclusively.
+7. **Automated Verification**:
+   - `test/eye_hospital_prescriptions_test.dart` covers 8 clinical scenarios across Cataract, Glaucoma, Cornea, Refractive, Retina, and Orbit care.
 
 

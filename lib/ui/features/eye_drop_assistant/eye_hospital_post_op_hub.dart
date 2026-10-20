@@ -107,8 +107,8 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
             title: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Eye Hospital & Post-Op Center', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Cataract • LASIK • Glaucoma Care', style: TextStyle(fontSize: 11, color: Color(0xFF52B788))),
+                Text('Ophthalmic Specialty & Post-Op Center', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Glaucoma • Retina • Cornea • Orbit Care', style: TextStyle(fontSize: 11, color: Color(0xFF52B788))),
               ],
             ),
             bottom: TabBar(
@@ -439,7 +439,7 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
   }
 
   // ──────────────────────────────────────────────────────────
-  // Tab 2: Authentic Eye Hospital Preset Regimens
+  // Tab 2: Authentic Clinical Subspecialty Preset Regimens
   // ──────────────────────────────────────────────────────────
   Widget _buildHospitalPresetsTab(BuildContext context, MedicationRepository repo) {
     return ListView(
@@ -448,7 +448,7 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         _buildHospitalPresetCard(
           context: context,
           repo: repo,
-          hospitalName: 'Aravind & Sankara Nethralaya Protocol',
+          hospitalName: 'Cornea & Anterior Segment Protocol',
           procedure: 'Phacoemulsification with Foldable IOL (Post-Cataract)',
           description: 'Standard 4-drug clinical regimen: Antibiotic + 4-Week Steroid Taper + CME NSAID + Lubricant.',
           medications: [
@@ -462,7 +462,7 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         _buildHospitalPresetCard(
           context: context,
           repo: repo,
-          hospitalName: 'Fixed-Dose Post-Cataract Combo Protocol',
+          hospitalName: 'Post-Cataract Fixed-Dose Combination',
           procedure: 'Post-Phacoemulsification Reduced-Bottle Regimen',
           description: 'Combines Fluoroquinolone + Dexamethasone into a single bottle, reducing instillation error.',
           medications: [
@@ -475,7 +475,7 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         _buildHospitalPresetCard(
           context: context,
           repo: repo,
-          hospitalName: 'Wills Eye Hospital Glaucoma Protocol',
+          hospitalName: 'Glaucoma Service Target-IOP Protocol',
           procedure: 'Triple Therapy for Primary Open-Angle Glaucoma',
           description: 'Target IOP lowering with nocturnal prostaglandin, daytime CAI/beta-blocker & alpha-2 agonist.',
           medications: [
@@ -488,13 +488,40 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         _buildHospitalPresetCard(
           context: context,
           repo: repo,
-          hospitalName: 'Refractive Surgery Center Protocol',
+          hospitalName: 'Corneal Refractive (LASIK/PRK) Surface Protocol',
           procedure: 'Post-LASIK & PRK Surface Healing Regimen',
           description: 'Prevents flap infection, controls haze with low-potency surface steroid, and heals epithelium.',
           medications: [
             _PresetMed(name: 'Moxifloxacin 0.5%', strength: '0.5%', form: OphthalmicFormulation.solution, freq: 'QID (4 times daily)', times: ['08:00', '12:00', '16:00', '20:00'], days: 7),
             _PresetMed(name: 'FML 0.1% (Fluorometholone)', strength: '0.1%', form: OphthalmicFormulation.suspension, freq: 'QID (4 times daily)', times: ['08:00', '12:00', '16:00', '20:00'], days: 14),
             _PresetMed(name: 'Hylo-Tear (Preservative-Free Tear)', strength: '0.1%', form: OphthalmicFormulation.solution, freq: 'Every 2 Hours (PRN)', times: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'], days: 30),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildHospitalPresetCard(
+          context: context,
+          repo: repo,
+          hospitalName: 'Retina & Vitreoretinal Post-Vitrectomy Protocol',
+          procedure: 'Pars Plana Vitrectomy with Gas Tamponade Post-Op',
+          description: 'Infection prophylaxis, steroid inflammation control, cycloplegic stabilization, and macular carotenoid nutrition.',
+          medications: [
+            _PresetMed(name: 'Moxifloxacin 0.5%', strength: '0.5%', form: OphthalmicFormulation.solution, freq: 'QID (4 times daily)', times: ['08:00', '12:00', '16:00', '20:00'], days: 14),
+            _PresetMed(name: 'Pred Forte 1% (Prednisolone)', strength: '1%', form: OphthalmicFormulation.suspension, freq: 'QID (4 times daily)', times: ['08:00', '12:00', '16:00', '20:00'], days: 21),
+            _PresetMed(name: 'Atropine 1% Eye Drops', strength: '1%', form: OphthalmicFormulation.solution, freq: 'BD (Twice daily)', times: ['08:00', '20:00'], days: 14),
+            _PresetMed(name: 'PreserVision AREDS 2 Formula', strength: 'Standard', form: OphthalmicFormulation.solution, freq: 'BD with Meals', times: ['08:00', '20:00'], days: 90, isOral: true),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildHospitalPresetCard(
+          context: context,
+          repo: repo,
+          hospitalName: 'Orbit & Oculoplastics Eyelid Care Protocol',
+          procedure: 'Blepharoplasty, Ptosis & Periorbital Suture Care',
+          description: 'Suture line antibiotic ointment, Meibomian lipid barrier maintenance, and ocular surface hydration.',
+          medications: [
+            _PresetMed(name: 'Bacitracin Ophthalmic Ointment', strength: '500 units/g', form: OphthalmicFormulation.ointment, freq: 'At Bedtime', times: ['21:30'], days: 10),
+            _PresetMed(name: 'AzaSite (Azithromycin 1%)', strength: '1%', form: OphthalmicFormulation.solution, freq: 'BD (Twice daily)', times: ['08:00', '20:00'], days: 7),
+            _PresetMed(name: 'Systane Ultra Lubricant', strength: 'Standard', form: OphthalmicFormulation.solution, freq: 'QID PRN', times: ['09:00', '13:00', '17:00', '21:00'], days: 30),
           ],
         ),
       ],
@@ -521,7 +548,7 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(color: const Color(0xFF2D6A4F).withAlpha(26), borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.local_hospital, color: Color(0xFF2D6A4F), size: 20),
+                  child: const Icon(Icons.healing_outlined, color: Color(0xFF2D6A4F), size: 20),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -542,12 +569,12 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
                 children: [
-                  Icon(Icons.circle, size: 6, color: _getFormulationStepInfo(m.form).badgeColor),
+                  Icon(Icons.circle, size: 6, color: m.isOral ? const Color(0xFF2D6A4F) : _getFormulationStepInfo(m.form).badgeColor),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text('${m.name} (${m.freq})', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                   ),
-                  Text(_getFormulationStepInfo(m.form).label, style: TextStyle(fontSize: 10, color: _getFormulationStepInfo(m.form).badgeColor, fontWeight: FontWeight.bold)),
+                  Text(m.isOral ? 'Oral' : _getFormulationStepInfo(m.form).label, style: TextStyle(fontSize: 10, color: m.isOral ? const Color(0xFF2D6A4F) : _getFormulationStepInfo(m.form).badgeColor, fontWeight: FontWeight.bold)),
                 ],
               ),
             )),
@@ -596,8 +623,10 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         id: const Uuid().v4(),
         name: pm.name,
         strength: pm.strength,
-        category: pm.form == OphthalmicFormulation.ointment ? MedCategory.eyeOintment : MedCategory.eyeDrop,
-        dosageUnit: DosageUnit.drops,
+        category: pm.isOral
+            ? MedCategory.oral
+            : (pm.form == OphthalmicFormulation.ointment ? MedCategory.eyeOintment : MedCategory.eyeDrop),
+        dosageUnit: pm.isOral ? DosageUnit.tablets : DosageUnit.drops,
         dosageAmount: 1.0,
         instruction: AdminInstruction.asNeeded,
         frequency: pm.freq,
@@ -605,24 +634,34 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
         startDate: now,
         endDate: now.add(Duration(days: pm.days)),
         expiryDate: now.add(const Duration(days: 180)),
-        openedDate: now,
-        afterOpeningDays: 28,
-        totalInventoryCount: pm.hasTaper ? 2 : 1,
-        refillThreshold: 1,
-        prescribingDoctor: 'Eye Hospital Clinical Preset',
-        colorHex: '#2D6A4F',
-        iconName: 'eye_drop',
-        requiresEyeDropProtocol: true,
-        eyeTarget: _selectedEye,
-        eyeDropGapMinutes: 5,
-        contactLensWarning: true,
-        isOintment: pm.form == OphthalmicFormulation.ointment,
+        openedDate: pm.isOral ? null : now,
+        afterOpeningDays: pm.isOral ? null : 28,
+        totalInventoryCount: pm.hasTaper ? 2 : (pm.isOral ? 60 : 1),
+        refillThreshold: pm.isOral ? 10 : 1,
+        prescribingDoctor: 'Ophthalmic Specialty Protocol',
+        colorHex: pm.isOral ? '#2D6A4F' : '#0284C7',
+        iconName: pm.isOral ? 'pill' : 'eye_drop',
+        requiresEyeDropProtocol: !pm.isOral,
+        eyeTarget: pm.isOral ? null : _selectedEye,
+        eyeDropGapMinutes: pm.isOral ? 0 : 5,
+        contactLensWarning: !pm.isOral,
+        isOintment: !pm.isOral && pm.form == OphthalmicFormulation.ointment,
         ophthalmicFormulation: pm.form,
         taperPlan: taperPlan,
       );
 
       repo.addMedication(med);
     }
+
+    HapticFeedback.mediumImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF2D6A4F),
+        content: Text('✅ $procedure applied successfully (${presetMeds.length} items scheduled)!'),
+      ),
+    );
+    _tabController.animateTo(0);
+  }
 
     HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -945,6 +984,7 @@ class _PresetMed {
   final List<String> times;
   final int days;
   final bool hasTaper;
+  final bool isOral;
 
   const _PresetMed({
     required this.name,
@@ -954,5 +994,6 @@ class _PresetMed {
     required this.times,
     required this.days,
     this.hasTaper = false,
+    this.isOral = false,
   });
 }

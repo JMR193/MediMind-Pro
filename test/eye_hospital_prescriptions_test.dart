@@ -9,11 +9,11 @@ void main() {
     parser = PrescriptionParserService();
   });
 
-  group('Eye Hospital & Post-Op Regimen Tests', () {
+  group('Ophthalmic Specialty & Post-Op Regimen Tests', () {
     test('1. Parses Post-Cataract Phaco Regimen with Combination Drops & Indian Matrix', () {
       const rxText = '''
-ARAVIND EYE HOSPITAL & POST-GRADUATE INSTITUTE OF OPHTHALMOLOGY
-Dr. M. Srinivasan, MS (Ophthalmology), Senior Cornea & Cataract Consultant
+CLINICAL OPHTHALMIC SURGICAL & POST-OP CARE SERVICE
+Dr. M. Srinivasan, MS, Senior Cornea & Cataract Consultant
 Patient: Meenakshi S. | Age: 66 | Reg No: 89432/2026
 Diagnosis: Post-Op Phacoemulsification with Foldable IOL (Left Eye)
 
@@ -129,7 +129,7 @@ Rx (Left Eye / OS):
       const rxPred = 'Pred Forte 1% - 1 drop QID with weekly taper (4-3-2-1) (OD) x 28 days';
       final draft = parser.parsePrescription(rxPred).first;
 
-      final med = draft.toMedication(doctorName: 'Dr. Venkatesh');
+      final med = draft.toMedication(doctorName: 'Dr. Ophthalmic Consultant');
       expect(med.isOphthalmic, isTrue);
       expect(med.requiresEyeDropProtocol, isTrue);
       expect(med.eyeTarget, equals('Right Eye (OD)'));
@@ -137,6 +137,51 @@ Rx (Left Eye / OS):
       expect(med.ophthalmicFormulation, equals(OphthalmicFormulation.suspension));
       expect(med.taperPlan, isNotNull);
       expect(med.taperPlan!.steps.length, equals(4));
+    });
+
+    test('7. Parses Vitreoretinal Post-Vitrectomy & Posterior Segment Protocol', () {
+      const rxRetina = '''
+VITREORETINAL SURGICAL & MACULAR CARE SERVICE
+Rx (Right Eye / OD):
+1. Moxifloxacin 0.5% Eye Drops - 1 drop 4 times daily (OD) x 14 days
+2. Pred Forte 1% Ophthalmic Suspension - 1 drop TID (OD) x 21 days
+3. Atropine 1% Eye Drops - 1 drop twice daily BD (OD) x 10 days
+4. PreserVision AREDS 2 Formula - 1 tablet twice daily with meals x 90 days
+''';
+      final results = parser.parsePrescription(rxRetina);
+      expect(results.length, equals(4));
+
+      final atropine = results.firstWhere((r) => r.name.toLowerCase().contains('atropine'));
+      expect(atropine.isEyeMedication, isTrue);
+      expect(atropine.eyeTarget, equals('Right Eye (OD)'));
+      expect(atropine.scheduleTimes.length, equals(2));
+
+      final areds2 = results.firstWhere((r) => r.name.toLowerCase().contains('preservision'));
+      expect(areds2.category, equals(MedCategory.oral));
+      expect(areds2.scheduleTimes.length, equals(2));
+    });
+
+    test('8. Parses Cornea, Severe Keratitis & Hypertonic Muro 128 Protocol', () {
+      const rxCornea = '''
+CORNEAL & ANTERIOR SEGMENT SPECIALTY PRACTICE
+Rx (Right Eye / OD):
+1. Natamycin 5% Eye Drops - 1 drop every 1 hour (Q1H) x 7 days
+2. Besivance 0.6% Eye Suspension - 1 drop every 2 hours (Q2H) x 7 days
+3. Homatropine 2% Eye Drops - 1 drop 3 times daily TID (OD) x 10 days
+4. Muro 128 Eye Drops - 1 drop 4 times daily QID x 30 days
+''';
+      final results = parser.parsePrescription(rxCornea);
+      expect(results.length, equals(4));
+
+      final natamycin = results.firstWhere((r) => r.name.toLowerCase().contains('natamycin'));
+      expect(natamycin.scheduleTimes.length, equals(13)); // Q1H hourly
+
+      final besivance = results.firstWhere((r) => r.name.toLowerCase().contains('besivance'));
+      expect(besivance.ophthalmicFormulation, equals(OphthalmicFormulation.suspension));
+
+      final muro128 = results.firstWhere((r) => r.name.toLowerCase().contains('muro'));
+      expect(muro128.isEyeMedication, isTrue);
+      expect(muro128.scheduleTimes.length, equals(4));
     });
   });
 }
