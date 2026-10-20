@@ -263,4 +263,27 @@
    - `LotusBloomWidget` & `LotusOnboardingScreen`: Procedural 3-stage vector canvas rendering BUD, BLOOMING, and BLOSSOM habit formation stages.
    - 100% verified static analysis with 0 errors across all files.
 
+### P. RxNLP 2.0 Prescription Understanding Engine & Safety Radar
+1. **Intelligent OCR De-Mangler (`cleanOcrDeMangle`)**:
+   - Cleans digital visual noise from crumpled paper, glares, and low-light doctor handwriting scans.
+   - Converts optical digit confusions: `1-O-1` $\rightarrow$ `1-0-1`, `S00mg` $\rightarrow$ `500mg`, `8D` $\rightarrow$ `BD`, `O.Smg` $\rightarrow$ `0.5mg`.
+2. **Indian Matrix Notation Support**:
+   - Native parsing of morning-afternoon-evening dosages: `1-0-1` (Twice daily), `1-1-1` (Three times daily), `1-0-0` (Morning fasting), `0-0-1` (Bedtime), `1-1-1-1` (Four times daily).
+3. **Comprehensive Multi-Regimen Latin Sigs**:
+   - Parses global sig codes: `Q4H`, `Q6H`, `Q8H`, `Q12H`, `QID`, `TID`, `BID`, `OD`, `QHS`, `PRN`.
+   - Maps each code into exact chronobiology clock times (e.g. Q6H $\rightarrow$ `06:00, 12:00, 18:00, 00:00`; QHS $\rightarrow$ `21:30`).
+4. **Circadian Chronotherapy Rules Engine**:
+   - Automatically detects medications that require special timing:
+     - Statins (Atorvastatin, Rosuvastatin, Simvastatin): Bedtime (`21:30`) due to nocturnal hepatic cholesterol HMG-CoA reductase synthesis peak.
+     - PPIs / Thyroid (Pantoprazole, Omeprazole, Levothyroxine): 30 minutes before breakfast (`07:00`) on an empty stomach.
+     - Diuretics (Furosemide, Torsemide): Early morning (`08:00`) to avoid nocturnal polyuria.
+5. **Prescription Safety Radar (`_applyPrescriptionSafetyRadar`)**:
+   - **Ophthalmic Washout Hazard Alert**: Flags multiple eye drop prescriptions with mandatory 5-minute spacing warning to prevent washout.
+   - **Hemorrhage / Bleed Hazard Alert**: Detects concurrent Anticoagulants/Antiplatelets (Warfarin, Apixaban, Clopidogrel) + NSAIDs (Ibuprofen, Naproxen, Diclofenac) and triggers immediate warning.
+6. **Fuzzy Typo & Handwriting Levenshtein Correction**:
+   - 180+ drug generic APIs and top brand database with fuzzy matching (Levenshtein distance $\le 2$).
+   - Seamlessly converts `ParsedMedicationDraft` directly into production `Medication` model for local SQLite/JSON persistence.
+7. **Automated Verification**:
+   - Complete 6-scenario unit test suite in `test/prescription_understanding_test.dart` passes with 100% green checkmarks.
+
 
