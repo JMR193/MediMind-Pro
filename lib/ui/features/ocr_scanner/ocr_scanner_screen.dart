@@ -864,6 +864,13 @@ class _OcrScannerScreenState extends State<OcrScannerScreen> {
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
                 ),
+                if (draft.route != null)
+                  Chip(
+                    avatar: const Icon(Icons.alt_route_rounded, size: 14, color: Color(0xFF2D6A4F)),
+                    label: Text(draft.route!, style: const TextStyle(fontSize: 11, color: Color(0xFF2D6A4F), fontWeight: FontWeight.w600)),
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                  ),
                 if (draft.isEyeMedication && draft.eyeTarget != null)
                   Chip(
                     avatar: const Icon(Icons.visibility, size: 14, color: Color(0xFF0284C7)),
@@ -880,6 +887,53 @@ class _OcrScannerScreenState extends State<OcrScannerScreen> {
                   ),
               ],
             ),
+            if (draft.chronotherapyAdvice != null) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF52B788).withAlpha(26),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFF52B788).withAlpha(77)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.schedule_rounded, size: 14, color: Color(0xFF2D6A4F)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Circadian: ${draft.chronotherapyAdvice}',
+                        style: const TextStyle(fontSize: 11.5, color: Color(0xFF1B4332), fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (draft.safetyWarning != null) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withAlpha(26),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.shade700),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 15, color: Colors.amber.shade900),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        draft.safetyWarning!,
+                        style: TextStyle(fontSize: 11.5, color: Colors.amber.shade900, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (draft.clinicalNotes != null) ...[
               const SizedBox(height: 6),
               Text(
