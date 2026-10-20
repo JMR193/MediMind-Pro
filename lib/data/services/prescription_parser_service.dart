@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import '../../domain/models/clinical_taper.dart';
 import '../../domain/models/medication.dart';
 
 /// Draft representation of an extracted medication from a prescription.
@@ -18,6 +19,8 @@ class ParsedMedicationDraft {
   AdminInstruction instruction;
   bool isEyeMedication;
   bool isOintment;
+  OphthalmicFormulation ophthalmicFormulation;
+  ClinicalTaperPlan? taperPlan;
   String? eyeTarget; // 'Both Eyes (OU)', 'Left Eye (OS)', 'Right Eye (OD)'
   String? route; // 'Oral (PO)', 'Inhalation (INH)', 'Topical', etc.
   int totalQuantity; // Calculated or prescribed quantity
@@ -44,6 +47,8 @@ class ParsedMedicationDraft {
     this.instruction = AdminInstruction.afterMeal,
     this.isEyeMedication = false,
     this.isOintment = false,
+    this.ophthalmicFormulation = OphthalmicFormulation.solution,
+    this.taperPlan,
     this.eyeTarget,
     this.route,
     this.totalQuantity = 30,
@@ -69,6 +74,8 @@ class ParsedMedicationDraft {
     AdminInstruction? instruction,
     bool? isEyeMedication,
     bool? isOintment,
+    OphthalmicFormulation? ophthalmicFormulation,
+    ClinicalTaperPlan? taperPlan,
     String? eyeTarget,
     String? route,
     int? totalQuantity,
@@ -95,6 +102,8 @@ class ParsedMedicationDraft {
       instruction: instruction ?? this.instruction,
       isEyeMedication: isEyeMedication ?? this.isEyeMedication,
       isOintment: isOintment ?? this.isOintment,
+      ophthalmicFormulation: ophthalmicFormulation ?? this.ophthalmicFormulation,
+      taperPlan: taperPlan ?? this.taperPlan,
       eyeTarget: eyeTarget ?? this.eyeTarget,
       route: route ?? this.route,
       totalQuantity: totalQuantity ?? this.totalQuantity,
@@ -176,6 +185,8 @@ class ParsedMedicationDraft {
       eyeDropGapMinutes: isEyeMedication ? 5 : 0,
       contactLensWarning: isEyeMedication,
       isOintment: isOintment,
+      ophthalmicFormulation: ophthalmicFormulation,
+      taperPlan: taperPlan,
     );
   }
 }
@@ -254,6 +265,66 @@ class PrescriptionParserService {
     'refresh tears': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Use PRN throughout day.'),
     'systane': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Shake well. Use PRN.'),
     'atropine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Apply 2-3 min punctal occlusion.'),
+
+    // 🏥 Comprehensive Eye Hospital, Post-Op & Glaucoma Formulations
+    'moxicip d': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Post-op combo: Moxifloxacin + Dexamethasone. Complete full 10-14 day course.'),
+    'milflox d': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Post-op combo: Moxifloxacin + Dexamethasone. Shake well.'),
+    'moxigram d': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Post-op combo: Moxifloxacin + Dexamethasone.'),
+    'vigadox': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Moxifloxacin/Dexamethasone combination. Shake bottle.'),
+    'moxipred': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Moxifloxacin/Prednisolone acetate: Shake vigorously 10-15s.'),
+    'ciplox d': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Ciprofloxacin + Dexamethasone: Shake well.'),
+    'ciprolet d': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Ciprofloxacin + Dexamethasone: Shake well.'),
+    'toba dm': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Tobramycin + Dexamethasone: Shake well before instillation.'),
+    'maxitrol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Neomycin/Polymyxin/Dexamethasone suspension: Shake well.'),
+    'gatifloxacin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: '4th gen fluoroquinolone: Complete prescribed course.'),
+    'zymar': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Gatifloxacin 0.3%: Complete prescribed course.'),
+    'besifloxacin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Besivance: Invert and shake bottle once prior to use.'),
+    'besivance': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Invert and shake bottle once prior to use.'),
+    'ofloxacin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Exocin: Space 5 min from other drops.'),
+    'exocin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Ofloxacin 0.3%: Space 5 min from other drops.'),
+    'levofloxacin eye': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Oftaquix: Complete full course.'),
+    'oftaquix': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Levofloxacin 0.5%: Complete full course.'),
+    'chloramphenicol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Chloromycetin: Keep refrigerated (2-8°C). Space 5 min.'),
+    'chloromycetin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Keep refrigerated (2-8°C). Space 5 min from other drops.'),
+    'natamycin': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Natacyn 5%: Fungal keratitis gold standard. Shake vigorously.'),
+    'natacyn': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Fungal keratitis therapy. Shake suspension vigorously.'),
+    'voriconazole': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Topical antifungal. Space 5 min from other drops.'),
+    'fluorometholone': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'FML: Surface steroid. Shake well. Low IOP spike risk.'),
+    'fml': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Fluorometholone 0.1%: Shake suspension well before use.'),
+    'flurocot': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Fluorometholone 0.1%: Shake well before use.'),
+    'rimexolone': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Vexol 1%: Shake suspension thoroughly before each drop.'),
+    'vexol': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Rimexolone 1%: Shake suspension thoroughly.'),
+    'ilevro': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Nepafenac 0.3%: Shake bottle well. Once daily post-cataract.'),
+    'prolensa': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Bromfenac 0.07%: Once daily for post-cataract inflammation.'),
+    'megabrom': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Bromfenac 0.09%: Once daily for post-op CME prevention.'),
+    'acular': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Ketorolac 0.5%: Space 5 min from other drops.'),
+    'azarga': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Brinzolamide/Timolol: Shake well. Apply 60s punctal occlusion.'),
+    'dorzox-t': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Dorzolamide/Timolol: Apply 60s punctal occlusion.'),
+    'brimocom': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Brimonidine/Timolol: Twice daily 12h apart. Apply punctal occlusion.'),
+    'duotrav': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Travoprost/Timolol: Once daily in evening (21:30). Apply punctal occlusion.'),
+    'ganfort': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Bimatoprost/Timolol: Once daily in evening. Apply punctal occlusion.'),
+    'xalacom': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Latanoprost/Timolol: Once daily in evening (21:30). Apply punctal occlusion.'),
+    'pilocarpine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Pilocar 2%: Causes miosis & transient brow ache. Space evenly.'),
+    'pilocar': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Pilocarpine: Space evenly as prescribed.'),
+    'diamox': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Acetazolamide 250mg: Take with full glass of water for acute post-op IOP reduction.'),
+    'acetazolamide': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Take with full water glass for acute intraocular pressure lowering.'),
+    'homatropine': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Homatropine 2%: Mydriatic/Cycloplegic. Relieves post-op ciliary spasm.'),
+    'cyclopentolate': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Cyclogyl 1%: Apply 60s punctal occlusion to avoid systemic effects.'),
+    'cyclogyl': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: true, chrono: 'Cyclopentolate 1%: Apply 60s punctal occlusion.'),
+    'tropicamide': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Pupil dilating drops. Temporary light sensitivity and blurred vision.'),
+    'tropicacyl': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Tropicamide: Blurs vision & dilates pupil.'),
+    'sodium hyaluronate': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'High molecular weight tears: Use PRN for post-op corneal healing.'),
+    'hylo-tear': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Preservative-free sodium hyaluronate: Use PRN.'),
+    'hylo-gel': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Viscous preservative-free sodium hyaluronate for intensive hydration.'),
+    'vismed': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Sodium hyaluronate 0.18%: Preservative-free PRN.'),
+    'hypromellose': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Genteal / Tears Naturale (HPMC): Lubricant PRN.'),
+    'genteal': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Hypromellose: Use PRN for soothing dry eyes.'),
+    'carbomer': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Viscotears: High viscosity gel. Apply before bedtime.'),
+    'viscotears': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Carbomer 0.2% eye gel: Apply last before bedtime.'),
+    'lacri-lube': (category: MedCategory.eyeOintment, unit: DosageUnit.applyTopical, isEye: true, isOintment: true, isNti: false, chrono: 'Mineral oil ointment: Apply thin ribbon at bedtime.'),
+    'zirgan': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Ganciclovir 0.15% ophthalmic gel: For viral dendritic keratitis.'),
+    'ganciclovir': (category: MedCategory.eyeDrop, unit: DosageUnit.drops, isEye: true, isOintment: false, isNti: false, chrono: 'Zirgan ophthalmic gel: For viral keratitis.'),
+    'zovirax ointment': (category: MedCategory.eyeOintment, unit: DosageUnit.applyTopical, isEye: true, isOintment: true, isNti: false, chrono: 'Acyclovir 3% eye ointment: Apply 5 times daily for herpes keratitis.'),
 
     // ❤️ Anticoagulation & Antiplatelets (Narrow Therapeutic Index)
     'warfarin': (category: MedCategory.oral, unit: DosageUnit.tablets, isEye: false, isOintment: false, isNti: true, chrono: 'Take at 18:00 (evening) consistently. Maintain stable Vitamin K intake.'),
@@ -556,12 +627,15 @@ class PrescriptionParserService {
 
     String? typoCorrectedFrom;
 
-    // 1. Scan for known drug names
+    // 1. Scan for known drug names (pick candidate with earliest position in the line)
+    int earliestIndex = 999999;
     for (final entry in _drugDictionary.entries) {
       final drugKey = entry.key;
       // Match whole word or exact term
       final regex = RegExp(r'\b' + RegExp.escape(drugKey) + r'\b', caseSensitive: false);
-      if (regex.hasMatch(lower)) {
+      final match = regex.firstMatch(lower);
+      if (match != null && match.start < earliestIndex) {
+        earliestIndex = match.start;
         detectedName = _capitalize(drugKey);
         detectedCategory = entry.value.category;
         detectedUnit = entry.value.unit;
@@ -570,8 +644,13 @@ class PrescriptionParserService {
         isNti = entry.value.isNti;
         chronoAdvice = entry.value.chrono;
         confidence = 0.98;
-        break;
       }
+    }
+
+    // Explicit ointment / drop keyword override
+    if (lower.contains('ointment') || lower.contains(' ung') || lower.contains('ung.')) {
+      isOint = true;
+      if (isEyeMed) detectedCategory = MedCategory.eyeOintment;
     }
 
     // 1b. AI Fuzzy Typo Correction (Levenshtein Distance) for messy handwriting & OCR typos
@@ -657,17 +736,87 @@ class PrescriptionParserService {
     // 6. Extract Food / Administration Instruction
     final instruction = _extractInstruction(text, isEyeMed);
 
-    // 7. Extract Eye Target & Route
+    // 7. Extract Eye Target, Route & Ophthalmic Formulation Hierarchy
     String? eyeTarget;
     String route = 'Oral (PO)';
+    OphthalmicFormulation formulation = OphthalmicFormulation.solution;
+    ClinicalTaperPlan? detectedTaperPlan;
+
     if (isEyeMed) {
       route = isOint ? 'Ophthalmic Ointment' : 'Ophthalmic (GTT)';
-      if (lower.contains('left eye') || lower.contains('(os)') || RegExp(r'\bos\b').hasMatch(lower)) {
+
+      // Identify Eye Target: OD (Right Eye), OS (Left Eye), OU (Both Eyes)
+      final leftTarget = RegExp(r'\b(left eye|os|l\.e\.|le|l/e)\b', caseSensitive: false).hasMatch(lower);
+      final rightTarget = RegExp(r'\b(right eye|r\.e\.|re|r/e)\b', caseSensitive: false).hasMatch(lower) ||
+          (RegExp(r'\bod\b', caseSensitive: false).hasMatch(lower) && !frequencyInfo.raw.contains('OD'));
+      final bothTarget = RegExp(r'\b(both eyes|ou|b\.e\.|be|b/e)\b', caseSensitive: false).hasMatch(lower);
+
+      if (leftTarget) {
         eyeTarget = 'Left Eye (OS)';
-      } else if (lower.contains('right eye') || lower.contains('(od)') || (RegExp(r'\bod\b').hasMatch(lower) && !frequencyInfo.raw.contains('OD'))) {
+      } else if (rightTarget) {
         eyeTarget = 'Right Eye (OD)';
+      } else if (bothTarget) {
+        eyeTarget = 'Both Eyes (OU)';
       } else {
         eyeTarget = 'Both Eyes (OU)';
+      }
+
+      // Identify Physical Formulation for Clinical Order of Administration
+      final nameLower = detectedName.toLowerCase();
+      if (isOint || lower.contains('ointment') || lower.contains(' ung') || lower.contains('ung.')) {
+        formulation = OphthalmicFormulation.ointment;
+      } else if (lower.contains('gel') || nameLower.contains('gel') || nameLower.contains('zirgan') || nameLower.contains('carbomer') || nameLower.contains('viscotears')) {
+        formulation = OphthalmicFormulation.gel;
+      } else if (lower.contains('emulsion') || nameLower.contains('durezol') || nameLower.contains('difluprednate') || nameLower.contains('restasis')) {
+        formulation = OphthalmicFormulation.emulsion;
+      } else if (lower.contains('suspension') || lower.contains('shake') || nameLower.contains('pred') || nameLower.contains('azopt') || nameLower.contains('brinzolamide') || nameLower.contains('nepafenac') || nameLower.contains('nevanac') || nameLower.contains('besivance') || nameLower.contains('maxidex') || nameLower.contains('maxitrol') || nameLower.contains('natamycin') || nameLower.contains('fml') || nameLower.contains('fluorometholone') || nameLower.contains('rimexolone')) {
+        formulation = OphthalmicFormulation.suspension;
+      } else {
+        formulation = OphthalmicFormulation.solution;
+      }
+
+      // Automated Post-Op Steroid Tapering Plan Builder
+      if (lower.contains('taper') || lower.contains('4-3-2-1') || lower.contains('then tid') || lower.contains('then bid') || lower.contains('weekly')) {
+        detectedTaperPlan = ClinicalTaperPlan(
+          id: const Uuid().v4(),
+          medicationName: detectedName,
+          indication: 'Post-Op Steroid Step-Down Protocol',
+          startDate: DateTime.now(),
+          steps: const [
+            TitrationStep(
+              stepNumber: 1,
+              dosageAmount: 1.0,
+              frequencyDescription: '4 times daily (QID)',
+              timesOfDay: ['08:00', '12:00', '16:00', '20:00'],
+              durationDays: 7,
+              clinicalInstruction: 'Week 1: High anti-inflammatory suppression',
+            ),
+            TitrationStep(
+              stepNumber: 2,
+              dosageAmount: 1.0,
+              frequencyDescription: '3 times daily (TID)',
+              timesOfDay: ['08:00', '14:00', '20:00'],
+              durationDays: 7,
+              clinicalInstruction: 'Week 2: Initial step-down taper',
+            ),
+            TitrationStep(
+              stepNumber: 3,
+              dosageAmount: 1.0,
+              frequencyDescription: 'Twice daily (BID)',
+              timesOfDay: ['08:00', '20:00'],
+              durationDays: 7,
+              clinicalInstruction: 'Week 3: Maintenance taper',
+            ),
+            TitrationStep(
+              stepNumber: 4,
+              dosageAmount: 1.0,
+              frequencyDescription: 'Once daily (OD)',
+              timesOfDay: ['08:00'],
+              durationDays: 7,
+              clinicalInstruction: 'Week 4: Final taper before cessation',
+            ),
+          ],
+        );
       }
     } else if (detectedCategory == MedCategory.inhaler) {
       route = 'Inhalation (INH)';
@@ -677,10 +826,10 @@ class PrescriptionParserService {
 
     // 8. Calculate total quantity needed
     final dosesPerDay = frequencyInfo.scheduleTimes.length;
-    final days = durationDays ?? 30;
+    final days = detectedTaperPlan != null ? 28 : (durationDays ?? 30);
     int calculatedQty;
     if (isEyeMed) {
-      calculatedQty = isOint ? 1 : 1; // 1 bottle / tube
+      calculatedQty = isOint ? 1 : (detectedTaperPlan != null ? 2 : 1); // 1-2 bottles
     } else {
       calculatedQty = (dosesPerDay * days).clamp(5, 500);
     }
@@ -692,13 +841,15 @@ class PrescriptionParserService {
       category: detectedCategory,
       dosageUnit: detectedUnit,
       dosageAmount: isEyeMed ? 1.0 : 1.0,
-      frequencyPattern: frequencyInfo.raw,
-      frequencyLabel: frequencyInfo.label,
+      frequencyPattern: detectedTaperPlan != null ? '4-3-2-1 Taper' : frequencyInfo.raw,
+      frequencyLabel: detectedTaperPlan != null ? 'Tapering (Week 1: 4x/day)' : frequencyInfo.label,
       scheduleTimes: frequencyInfo.scheduleTimes,
-      durationDays: durationDays,
+      durationDays: days,
       instruction: instruction,
       isEyeMedication: isEyeMed,
       isOintment: isOint,
+      ophthalmicFormulation: formulation,
+      taperPlan: detectedTaperPlan,
       eyeTarget: eyeTarget,
       route: route,
       totalQuantity: calculatedQty,
@@ -746,6 +897,20 @@ class PrescriptionParserService {
       if (n != '0') {
         return (raw: '0-0-$n', label: 'Once daily (Bedtime)', scheduleTimes: ['21:30']);
       }
+    }
+
+    // 1b. Eye Hospital High-Frequency Intensive Sigs (Post-Op / Severe Keratitis)
+    if (RegExp(r'\b(hourly|every 1 hour|q1h|every hour)\b').hasMatch(lower)) {
+      return (raw: 'Q1H', label: 'Every hour (Intensive)', scheduleTimes: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00']);
+    }
+    if (RegExp(r'\b(q2h|every 2 hours|2 hourly|every 2h)\b').hasMatch(lower)) {
+      return (raw: 'Q2H', label: 'Every 2 hours', scheduleTimes: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00']);
+    }
+    if (RegExp(r'\b(6 times daily|6 times a day|6x daily)\b').hasMatch(lower)) {
+      return (raw: '6x/day', label: '6 times daily', scheduleTimes: ['08:00', '10:30', '13:00', '15:30', '18:00', '20:30']);
+    }
+    if (RegExp(r'\b(5 times daily|5 times a day|5x daily)\b').hasMatch(lower)) {
+      return (raw: '5x/day', label: '5 times daily', scheduleTimes: ['08:00', '11:00', '14:00', '17:00', '20:00']);
     }
 
     // 2. Specific Interval Sigs: Q4H, Q6H, Q8H, Q12H
@@ -905,7 +1070,35 @@ class PrescriptionParserService {
       }
     }
 
-    // 2. High Bleed Risk: Anticoagulant + NSAID / Aspirin
+    // 2. Ophthalmic Post-Op Specific Clinical Radar
+    for (final d in drafts) {
+      if (!d.isEyeMedication) continue;
+      final n = d.name.toLowerCase();
+
+      // Suspension Agitation Alert
+      if (d.ophthalmicFormulation == OphthalmicFormulation.suspension || n.contains('pred') || n.contains('azopt') || n.contains('brinzolamide') || n.contains('nepafenac') || n.contains('nevanac') || n.contains('besivance') || n.contains('fml') || n.contains('rimexolone') || n.contains('maxidex') || n.contains('maxitrol') || n.contains('natamycin')) {
+        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Shake bottle vigorously for 10-15 seconds before each drop.';
+      }
+
+      // Beta-Blocker Punctal Occlusion Requirement
+      if (n.contains('timolol') || n.contains('cosopt') || n.contains('combigan') || n.contains('azarga') || n.contains('duotrav') || n.contains('ganfort') || n.contains('xalacom') || n.contains('atropine')) {
+        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Apply 60-second punctal occlusion (press tear duct at nasal corner) to avoid systemic beta-blocker absorption.';
+      }
+
+      // Ointment Administration Timing
+      if (d.isOintment || d.ophthalmicFormulation == OphthalmicFormulation.ointment) {
+        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Apply last at bedtime (10-15 min after liquid drops). Blurs vision temporarily.';
+      }
+    }
+
+    // Post-Op Multidrop Care & RSVP Emergency Endophthalmitis Notice
+    if (eyeDrops.length >= 2 && eyeDrops.any((e) => e.name.toLowerCase().contains('moxi') || e.name.toLowerCase().contains('pred') || e.name.toLowerCase().contains('dexa') || e.name.toLowerCase().contains('cipro') || e.name.toLowerCase().contains('tobra') || e.name.toLowerCase().contains('vigamox'))) {
+      for (final ed in eyeDrops) {
+        ed.clinicalNotes = (ed.clinicalNotes != null ? '${ed.clinicalNotes!} • ' : '') + 'Post-op care: Wear eye shield while sleeping. Do not rub eyes. If severe pain, light sensitivity, or sudden vision loss (RSVP) occurs, contact eye clinic immediately.';
+      }
+    }
+
+    // 3. High Bleed Risk: Anticoagulant + NSAID / Aspirin
     final hasAnticoagulant = names.any((n) => n.contains('warfarin') || n.contains('apixaban') || n.contains('rivaroxaban') || n.contains('dabigatran') || n.contains('eliquis') || n.contains('xarelto'));
     final hasNsaid = names.any((n) => n.contains('aspirin') || n.contains('ibuprofen') || n.contains('naproxen') || n.contains('diclofenac') || n.contains('combiflam') || n.contains('aceclofenac'));
 
@@ -918,7 +1111,7 @@ class PrescriptionParserService {
       }
     }
 
-    // 3. Statin + Grapefruit / CYP3A4 Notice
+    // 4. Statin + Grapefruit / CYP3A4 Notice
     for (final d in drafts) {
       if (d.name.toLowerCase().contains('atorvastatin') || d.name.toLowerCase().contains('simvastatin')) {
         d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Avoid grapefruit juice (inhibits CYP3A4 metabolism).';
@@ -980,6 +1173,39 @@ class PrescriptionParserService {
   // Pre-loaded Sample Prescriptions for Instant Testing
   // ──────────────────────────────────────────────────────────
   static const List<({String title, String subtitle, String text})> samplePrescriptions = [
+    (
+      title: '👁️ Post-Cataract Phacoemulsification Regimen',
+      subtitle: 'Post-op drops with weekly steroid taper (4-3-2-1) & washout spacing',
+      text: '''
+ARAVIND EYE CARE SYSTEM & POST-OP CLINIC
+Dr. R. Venkatesh, MS, DO (Senior Cataract Surgeon)
+Patient: Sundaram K. | Age: 68 | Eye: Left Eye (OS)
+Procedure: Phacoemulsification with Foldable IOL (Left Eye)
+
+Rx (Left Eye / OS):
+1. Moxicip D Eye Drops - 1 drop 4 times daily (OS) x 14 days
+2. Pred Forte 1% Ophthalmic Suspension - 1 drop QID with weekly taper (4-3-2-1) x 28 days
+3. Nevanac 0.1% Eye Drops - 1 drop TDS (OS) x 30 days
+4. Refresh Tears Eye Drops - 1 drop 4 times daily PRN (OS) x 30 days
+(Wait at least 5 minutes between drops. Wear eye shield at night. Do not rub eyes.)
+'''
+    ),
+    (
+      title: '👁️ Glaucoma Multidrop & IOP Control Protocol',
+      subtitle: 'Timolol, Dorzolamide & Bedtime Latanoprost with Punctal Occlusion',
+      text: '''
+WILLS EYE HOSPITAL - GLAUCOMA SERVICE
+Dr. Jonathan Myers, MD
+Patient: Harold Green | Age: 71 | Diagnosis: POAG
+Target Eye: Both Eyes (OU)
+
+Rx:
+1. Cosopt Eye Drops (Dorzolamide/Timolol) - 1 drop twice daily BD (OU) x 60 days
+2. Alphagan 0.2% Eye Drops (Brimonidine) - 1 drop twice daily BD (OU) x 60 days
+3. Latanoprost 0.005% Eye Drops - 1 drop strictly at bedtime QHS (OU) x 60 days
+(Press tear duct for 60 seconds after Cosopt. Space drops 5-10 minutes apart.)
+'''
+    ),
     (
       title: '👁️ Ophthalmic & Post-Cataract Surgery Rx',
       subtitle: '4 eye drops & ointment with 5-10m wash-out warning',

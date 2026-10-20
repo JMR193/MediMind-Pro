@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../core/theme.dart';
+import 'eye_hospital_post_op_hub.dart';
 
 class EyeDropScreen extends StatefulWidget {
   const EyeDropScreen({super.key});
@@ -65,6 +66,13 @@ class _EyeDropScreenState extends State<EyeDropScreen> with TickerProviderStateM
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.local_hospital_outlined),
+                tooltip: 'Eye Hospital & Post-Op Center',
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const EyeHospitalPostOpHub()));
+                },
+              ),
               if (session != null)
                 TextButton(
                   onPressed: () {
@@ -98,6 +106,18 @@ class _EyeDropScreenState extends State<EyeDropScreen> with TickerProviderStateM
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
             label: const Text('Back to Dashboard'),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF2D6A4F),
+              side: const BorderSide(color: Color(0xFF2D6A4F)),
+            ),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const EyeHospitalPostOpHub()));
+            },
+            icon: const Icon(Icons.local_hospital_outlined),
+            label: const Text('Open Eye Hospital & Post-Op Center'),
           ),
         ],
       ),
