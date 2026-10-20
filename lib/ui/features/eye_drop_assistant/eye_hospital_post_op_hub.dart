@@ -663,16 +663,6 @@ class _EyeHospitalPostOpHubState extends State<EyeHospitalPostOpHub> with Single
     _tabController.animateTo(0);
   }
 
-    HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF2D6A4F),
-        content: Text('✅ $procedure applied successfully (${presetMeds.length} drops scheduled)!'),
-      ),
-    );
-    _tabController.animateTo(0);
-  }
-
   // ──────────────────────────────────────────────────────────
   // Tab 3: Steroid Step-Down Taper Tracker
   // ──────────────────────────────────────────────────────────
