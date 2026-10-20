@@ -286,4 +286,32 @@
 7. **Automated Verification**:
    - Complete 6-scenario unit test suite in `test/prescription_understanding_test.dart` passes with 100% green checkmarks.
 
+### Q. Eye Hospital & Post-Operative Ophthalmic Clinical Hub (`EyeHospitalPostOpHub`)
+1. **Clinical Formulation Administration Ladder**:
+   - Sequences drops strictly by physical formulation:
+     1. Clear Solutions (Fastest corneal absorption without barrier)
+     2. Suspensions (Vigorous 10-15s shaking reminder: Pred Forte, Nevanac, Azopt, Besivance)
+     3. Emulsions (Milky drops: Durezol, Restasis)
+     4. Gels (Viscous drops: Viscotears, Zirgan)
+     5. Ointments (Last at bedtime: Tobradex ointment, Erythromycin, Lacri-Lube)
+2. **Authentic Eye Hospital Preset Regimens (1-Tap Import)**:
+   - **Post-Cataract Phacoemulsification**: Moxifloxacin 0.5% + Pred Forte 1% (4-3-2-1 taper) + Nevanac 0.1% + Refresh Tears (Aravind / Sankara Nethralaya protocol).
+   - **Fixed-Dose Post-Cataract Combo**: Moxicip D (Moxi + Dexa) + Nevanac + Vismed (reduces bottle count).
+   - **Wills Eye Hospital Glaucoma Protocol**: Cosopt (Dorzolamide/Timolol) + Alphagan + Xalatan (Bedtime).
+   - **Post-LASIK & PRK Surface Protocol**: Moxifloxacin + Fluorometholone (FML) + Preservative-Free Tears.
+3. **Automated 4-Week Steroid Taper Builder & Tracker**:
+   - Detects `4-3-2-1`, `weekly taper`, `then TID` in prescription scans.
+   - Automatically builds a 4-step `ClinicalTaperPlan` (Week 1: 4x/d $\rightarrow$ Week 2: 3x/d $\rightarrow$ Week 3: 2x/d $\rightarrow$ Week 4: 1x/d $\rightarrow$ Stop).
+4. **Post-Op Safety Rules & Emergency "RSVP" Red-Flag Triage**:
+   - Wear rigid eye shield during sleep for 1-2 weeks.
+   - Never rub operative eye (incision / flap integrity).
+   - Avoid tap water in eyes for 7-14 days.
+   - Avoid heavy lifting (>5 kg) or bending to prevent IOP spikes.
+   - Emergency RSVP Red-Flag Triage (Redness, Sensitivity to light, Vision loss, throbbing Pain) with speed-dial to emergency eye dispatch.
+5. **Washout Spacing & Punctal Occlusion**:
+   - Active 5-minute spacing timer between sequential eye drops.
+   - 60-second guided Punctal Occlusion coach for Timolol and beta-blockers.
+6. **Automated Verification**:
+   - `test/eye_hospital_prescriptions_test.dart` passes with 100% green checkmarks across 6 clinical scenarios.
+
 
