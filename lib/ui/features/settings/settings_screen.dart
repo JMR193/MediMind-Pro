@@ -6,9 +6,9 @@ import '../../../domain/models/app_settings.dart';
 import '../../core/apple_glass_decorations.dart';
 import '../../core/theme.dart';
 import '../device_integration/device_optimization_screen.dart';
-import '../emergency_hud/universal_emergency_hud_screen.dart';
-import '../refill_forecast/refill_forecast_screen.dart';
-import '../safety_scanner/medication_safety_scanner_screen.dart';
+import '../profile/emergency_medical_id_screen.dart';
+import '../medications/refill_tracker_screen.dart';
+import '../ocr_scanner/ocr_scanner_screen.dart';
 import '../travel/travel_dose_shifter_screen.dart';
 import '../wearable/wearable_companion_screen.dart';
 
@@ -83,12 +83,12 @@ class SettingsScreen extends StatelessWidget {
               _buildSection(context, '🌍 Global Patient Safety & Travel Suite', [
                 _buildNavigationTile(
                   context,
-                  'Scan-Before-Swallow HUD',
-                  'Optical safety check to prevent accidental wrong-bottle ingestion',
+                  'Scan Prescription / Label',
+                  'Optical safety check to parse medications and prevent wrong-bottle ingestion',
                   Icons.qr_code_scanner_rounded,
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const MedicationSafetyScannerScreen()),
+                    MaterialPageRoute(builder: (_) => const OcrScannerScreen()),
                   ),
                 ),
                 _buildNavigationTile(
@@ -103,22 +103,22 @@ class SettingsScreen extends StatelessWidget {
                 ),
                 _buildNavigationTile(
                   context,
-                  'Paramedic Emergency HUD (Multilingual)',
-                  'Offline life-saving ICE pass with 10 languages & anticoagulant alert',
+                  'Emergency Medical ID (ICE)',
+                  'Offline life-saving ICE pass with blood group, allergies & emergency contacts',
                   Icons.emergency_rounded,
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const UniversalEmergencyHudScreen()),
+                    MaterialPageRoute(builder: (_) => const EmergencyMedicalIdScreen()),
                   ),
                 ),
                 _buildNavigationTile(
                   context,
-                  'Pharmacy Desert & Refill Forecaster',
-                  'Stock depletion timeline with weekend refill cliff warning',
+                  'Smart Refill & Stock Tracker',
+                  'Stock depletion timeline with refill warning and 1-tap reordering',
                   Icons.inventory_2_outlined,
                   () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const RefillForecastScreen()),
+                    MaterialPageRoute(builder: (_) => const RefillTrackerScreen()),
                   ),
                 ),
               ]),

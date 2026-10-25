@@ -234,6 +234,7 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
                     if (widget.customSpeechText != null &&
                         widget.customSpeechText!.isNotEmpty) ...[
                       Container(
+                        constraints: BoxConstraints(maxWidth: widget.size * 1.5),
                         margin: const EdgeInsets.only(bottom: 6),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
@@ -371,7 +372,7 @@ class _MediBuddyPainter extends CustomPainter {
       center: const Alignment(-0.35, -0.45),
       radius: 0.95,
       colors: mood == MediBuddyMood.sleeping
-          ? const [Color(0xFFE2E8F0), Color(0xFF94A3B8), Color(0xFF64748B)]
+          ? const [Color(0xFFFFFFFF), Color(0xFFE2E8F0), Color(0xFF94A3B8), Color(0xFF64748B)]
           : const [Color(0xFFFFFFFF), Color(0xFFE0F2FE), Color(0xFF38BDF8), Color(0xFF0284C7)],
       stops: const [0.0, 0.45, 0.85, 1.0],
     );

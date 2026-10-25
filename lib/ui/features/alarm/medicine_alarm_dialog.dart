@@ -18,11 +18,19 @@ class MedicineAlarmDialog extends StatefulWidget {
     required this.scheduledTime,
   });
 
-  static Future<void> show(BuildContext context, Medication medication, String scheduledTime) {
+  static Future<void> show(
+    BuildContext context, {
+    required Medication medication,
+    String? scheduledTime,
+    VoidCallback? onTaken,
+    VoidCallback? onSnooze,
+  }) {
+    final time = scheduledTime ??
+        (medication.scheduleTimes.isNotEmpty ? medication.scheduleTimes.first : '08:00');
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => MedicineAlarmDialog(medication: medication, scheduledTime: scheduledTime),
+      builder: (_) => MedicineAlarmDialog(medication: medication, scheduledTime: time),
     );
   }
 
@@ -143,9 +151,10 @@ class _MedicineAlarmDialogState extends State<MedicineAlarmDialog> with SingleTi
           ],
         ),
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             // Greeting & Time (MediLink Slide 16)
             Text(
               '$greeting, $userName!',
@@ -325,6 +334,7 @@ class _MedicineAlarmDialogState extends State<MedicineAlarmDialog> with SingleTi
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

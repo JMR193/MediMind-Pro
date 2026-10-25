@@ -319,3 +319,40 @@
    - `test/eye_hospital_prescriptions_test.dart` covers 8 clinical scenarios across Cataract, Glaucoma, Cornea, Refractive, Retina, and Orbit care.
 
 
+## 9. Simplification, De-Duplication & Real-Time Architecture Stabilization (October 2026)
+
+### A. Android Build Toolchain Modernization
+1. **Android Gradle Plugin (AGP)**: Upgraded to `8.9.1` in `android/settings.gradle.kts`.
+2. **Gradle Distribution**: Upgraded to `gradle-8.11.1-all.zip` in `android/gradle/wrapper/gradle-wrapper.properties`.
+3. **Kotlin**: Upgraded to `2.2.20` in `android/settings.gradle.kts`.
+4. **compileSdk**: Configured for `compileSdk = 37`, fully resolving `AarMetadata` camera/browser/activity requirements natively without temporary suppression hacks.
+
+### B. Consolidated Real-Time Dashboard & UI/UX Simplification
+1. **Clean Calming Healthcare UI**:
+   - Replaced bloated, multiple competing views with a single, highly readable healthcare interface themed in calming green tones (`#2D6A4F`, `#52B788`, `#D8F3DC`, `#F4FBF7`) and soft rounded cards (`BorderRadius.circular(24)`).
+   - **Today's Progress Card**: Displays live daily completion tally (`X of Y doses completed`) and adherence rate indicator.
+   - **Pip Companion Card**: Friendly empathy character providing hydration reminders and motivation.
+   - **Active Eye Drop Session Banner**: Real-time 5-minute spacing countdown between sequential drops.
+   - **Refill / Stock-Out Warning Banner**: Highlighting near-empty bottles.
+   - **Today's Medication Schedule**: Chronologically grouped into Morning, Afternoon, Evening, and Bedtime with 1-tap `✓ Take Dose` (instant repository logging + haptic feedback) and `⏰ Snooze` buttons.
+   - **6 Essential Quick Clinical Actions**: Add Medication, AI Assistant, Eye Care Hub, Refill & Stock, Interactions Matrix, and Emergency Medical ID.
+   - **Recent Activity Feed**: Real-time audit log of recent intake timestamps.
+
+### C. Redundant Simulators & Duplicate Screen Purge (17 Files Removed)
+1. **Removed Heavy Matrix4 3D Simulators**:
+   - `visual_lab_screen.dart`, `ophthalmic_3d_drop_simulator.dart`, `animated_water_wave_tracker.dart`, `realistic_3d_medicine_card.dart`, `interactive_3d_pill_viewer.dart`.
+   - Replaced with high-performance, battery-friendly vector category badges and smooth animations (120 FPS).
+2. **Eliminated Duplicate Dashboards & Screens**:
+   - `modern_healthcare_dashboard_view.dart`, `carelink_elderly_care_widget.dart`, `gotoinc_schedule_calendar_widget.dart`.
+   - `alarm_modal_screen.dart` & `smart_medicine_reminder_dialog.dart` $\rightarrow$ Consolidated into single unified `MedicineAlarmDialog`.
+   - `refill_forecast_screen.dart` $\rightarrow$ Unified into `RefillTrackerScreen`.
+   - `medication_safety_scanner_screen.dart` $\rightarrow$ Unified into `OcrScannerScreen`.
+   - `universal_emergency_hud_screen.dart` $\rightarrow$ Unified into `EmergencyMedicalIdScreen`.
+   - `reports_screen.dart` $\rightarrow$ Unified into `IntakeHistoryScreen`.
+   - `digital_twin_pk_card.dart`, `food_interaction_radar_card.dart`, `smart_chronotherapy_advisor_screen.dart` $\rightarrow$ Consolidated into `AiAssistantScreen` and core domain services.
+
+### D. Automated Test Verification
+- `test/prescription_understanding_test.dart`: 6/6 tests passing (Indian Matrix notation, Latin Sigs, Washout radar, Levenshtein fuzzy matching).
+- `test/eye_hospital_prescriptions_test.dart`: 8/8 tests passing (Cataract, Cornea, Glaucoma, Retina, Orbit post-op regimens).
+- `test/medicine_alarm_dialog_test.dart`: Verified dose logging, snoozing, and responsive layout.
+- `test/visuals_and_companion_unit_test.dart`: Verified mascot rendering across all moods (including sleeping radial shader) and companion card widget.

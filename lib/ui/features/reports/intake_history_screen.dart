@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../../domain/models/medication_log.dart';
-import '../visuals_3d/realistic_3d_medicine_card.dart';
-import '../alarm/smart_medicine_reminder_dialog.dart';
+import '../alarm/medicine_alarm_dialog.dart';
 
 class IntakeHistoryScreen extends StatefulWidget {
   const IntakeHistoryScreen({super.key});
@@ -263,13 +262,24 @@ class _IntakeHistoryScreenState extends State<IntakeHistoryScreen> {
               ),
               const SizedBox(width: 14),
 
-              // Realistic 3D Pill Thumbnail
-              SizedBox(
+              // Clean Medicine Icon Thumbnail
+              Container(
                 width: 44,
                 height: 44,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Realistic3dMedicineCard(medication: med),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD8F3DC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  med.category == MedCategory.eyeDrop || med.category == MedCategory.eyeOintment
+                      ? Icons.remove_red_eye_outlined
+                      : med.category == MedCategory.inhaler
+                          ? Icons.air_outlined
+                          : med.category == MedCategory.injectable
+                              ? Icons.vaccines_outlined
+                              : Icons.medication_outlined,
+                  color: const Color(0xFF2D6A4F),
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 14),
@@ -301,17 +311,10 @@ class _IntakeHistoryScreenState extends State<IntakeHistoryScreen> {
               IconButton(
                 icon: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
                 onPressed: () {
-                  SmartMedicineReminderDialog.show(
+                  MedicineAlarmDialog.show(
                     context,
                     medication: med,
-                    onTaken: () {
-                      context.read<MedicationRepository>().logDose(
-                            medication: med,
-                            scheduledTime: scheduledTimeStr,
-                            status: LogStatus.taken,
-                          );
-                    },
-                    onSnooze: () {},
+                    scheduledTime: scheduledTimeStr,
                   );
                 },
               ),

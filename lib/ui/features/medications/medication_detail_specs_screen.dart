@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../../domain/models/medication_log.dart';
-import '../visuals_3d/interactive_3d_pill_viewer.dart';
 import 'refill_tracker_screen.dart';
 import '../medication_wizard/add_medication_screen.dart';
 
@@ -35,27 +34,36 @@ class MedicationDetailSpecsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // Centered Hero 3D Pill Display with Soft Radial Glow (Matching Image 2 Screen 3)
+          // Centered Hero Medicine Display with Soft Radial Glow
           Center(
             child: Container(
-              width: 240,
-              height: 200,
+              width: 160,
+              height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                gradient: const RadialGradient(
+                  colors: [Color(0xFFD8F3DC), Color(0xFFB7E4C7)],
+                  radius: 0.85,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2D6A4F).withOpacity(0.08),
-                    blurRadius: 32,
+                    color: const Color(0xFF2D6A4F).withOpacity(0.12),
+                    blurRadius: 28,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Interactive3dPillViewer(
-                  initialType: _mapCategoryToPillType(medication.category),
-                  size: 200,
+              child: Center(
+                child: Icon(
+                  medication.category == MedCategory.eyeDrop || medication.category == MedCategory.eyeOintment
+                      ? Icons.remove_red_eye_rounded
+                      : medication.category == MedCategory.inhaler
+                          ? Icons.air_rounded
+                          : medication.category == MedCategory.injectable
+                              ? Icons.vaccines_rounded
+                              : Icons.medication_rounded,
+                  size: 72,
+                  color: const Color(0xFF2D6A4F),
                 ),
               ),
             ),
@@ -236,17 +244,6 @@ class MedicationDetailSpecsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Pill3DType _mapCategoryToPillType(MedCategory category) {
-    switch (category) {
-      case MedCategory.eyeDrop:
-        return Pill3DType.dropperBottle;
-      case MedCategory.oral:
-        return Pill3DType.capsule;
-      default:
-        return Pill3DType.scoredTablet;
-    }
   }
 
   void _showOptionsSheet(BuildContext context) {

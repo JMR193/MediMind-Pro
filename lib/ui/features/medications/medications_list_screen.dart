@@ -4,7 +4,6 @@ import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/medication.dart';
 import '../../core/utils.dart';
 import '../../core/theme.dart';
-import '../visuals_3d/realistic_3d_medicine_card.dart';
 import 'medication_detail_specs_screen.dart';
 import '../companion/medi_buddy_character.dart';
 import '../medication_wizard/add_medication_screen.dart';
@@ -90,12 +89,23 @@ class _MedCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  SizedBox(
+                  Container(
                     width: 52,
                     height: 52,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Realistic3dMedicineCard(medication: med),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      med.category == MedCategory.eyeDrop || med.category == MedCategory.eyeOintment
+                          ? Icons.remove_red_eye_outlined
+                          : med.category == MedCategory.inhaler
+                              ? Icons.air_outlined
+                              : med.category == MedCategory.injectable
+                                  ? Icons.vaccines_outlined
+                                  : Icons.medication_outlined,
+                      color: color,
+                      size: 26,
                     ),
                   ),
                   const SizedBox(width: 14),

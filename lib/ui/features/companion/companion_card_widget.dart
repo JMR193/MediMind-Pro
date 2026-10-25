@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../core/apple_glass_decorations.dart';
-import '../visuals_3d/visual_lab_screen.dart';
+import '../ai_assistant/ai_assistant_screen.dart';
 import 'medi_buddy_character.dart';
 
 class CompanionCardWidget extends StatefulWidget {
@@ -94,7 +94,6 @@ class _CompanionCardWidgetState extends State<CompanionCardWidget> {
                   outfit: _currentOutfit,
                   interactive: true,
                   enableVoiceOnTap: true,
-                  customSpeechText: 'Hello $patientName! $_activeSpeechBubble',
                   onTap: () {
                     setState(() {
                       _activeSpeechBubble = 'I love seeing you take such great care of your health, $patientName!';
@@ -193,13 +192,13 @@ class _CompanionCardWidgetState extends State<CompanionCardWidget> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const VisualLabScreen(),
+                                    builder: (_) => const AiAssistantScreen(),
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.view_in_ar_rounded, size: 14, color: Color(0xFF7C3AED)),
+                              icon: const Icon(Icons.psychology_outlined, size: 14, color: Color(0xFF7C3AED)),
                               label: const Text(
-                                '3D Pill Lab',
+                                'Chat with AI',
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF7C3AED)),
                               ),
                               style: OutlinedButton.styleFrom(
