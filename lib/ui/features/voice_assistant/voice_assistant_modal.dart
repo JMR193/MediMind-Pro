@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../../../data/repositories/medication_repository.dart';
+import '../../../data/services/tts_service.dart';
+import '../../../domain/models/dose_log.dart';
 import '../../../domain/models/medication.dart';
 import '../../core/theme.dart';
 import '../medication_wizard/add_medication_screen.dart';
@@ -22,6 +27,8 @@ class VoiceAssistantModal extends StatefulWidget {
 
 class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTickerProviderStateMixin {
   final stt.SpeechToText _speech = stt.SpeechToText();
+  final TtsService _ttsService = TtsService();
+
   bool _isListening = false;
   bool _speechAvailable = false;
   String _wordsSpoken = '';
@@ -39,6 +46,7 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
   void dispose() {
     _animCtrl.dispose();
     _speech.stop();
+    _ttsService.stop();
     super.dispose();
   }
 
@@ -80,6 +88,10 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
             _parsedIntent = _parseVoiceCommand(_wordsSpoken);
           }
         });
+
+        if (result.finalResult && _parsedIntent != null) {
+          _speakIntentConfirmation(_parsedIntent!);
+        }
       },
       listenOptions: stt.SpeechListenOptions(
         listenFor: const Duration(seconds: 15),
@@ -93,32 +105,114 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
     if (!mounted) return;
     setState(() => _isListening = false);
     if (_wordsSpoken.isNotEmpty) {
+      final intent = _parseVoiceCommand(_wordsSpoken);
       setState(() {
-        _parsedIntent = _parseVoiceCommand(_wordsSpoken);
+        _parsedIntent = intent;
       });
+      _speakIntentConfirmation(intent);
     }
   }
 
-  /// Voice command parser: extracts medication name, dosage times, and categories
+  void _speakIntentConfirmation(Map<String, dynamic> intent) {
+    final type = intent['type'] as String;
+    if (type == 'log_dose') {
+      _ttsService.speak('Tap confirm to log ${intent['medName']} as taken.');
+    } else if (type == 'schedule_reminder') {
+      final times = (intent['times'] as List<String>).join(' and ');
+      _ttsService.speak('Understood. Tap schedule to set ${intent['name']} at $times.');
+    } else if (type == 'query_today') {
+      _ttsService.speak(intent['summary'] as String? ?? 'Checking your schedule.');
+    }
+  }
+
+  /// Voice command parser: handles Dose Logging, Reminder Scheduling, and Today's Queries
   Map<String, dynamic> _parseVoiceCommand(String speech) {
     final lower = speech.toLowerCase();
+    final repo = context.read<MedicationRepository>();
+    final activeMeds = repo.activeMedications;
+
+    // 1. Detect Dose Intake / Logging Intent ("I took my Timolol", "Logged eye drops", "Already drank medicine")
+    final isIntakeCommand = lower.contains('took') ||
+        lower.contains('taken') ||
+        lower.contains('drank') ||
+        lower.contains('applied') ||
+        lower.contains('administered') ||
+        lower.contains('done taking');
+
+    if (isIntakeCommand) {
+      Medication? matchedMed;
+      for (final med in activeMeds) {
+        if (lower.contains(med.name.toLowerCase())) {
+          matchedMed = med;
+          break;
+        }
+      }
+
+      // Fallback: check category keywords
+      if (matchedMed == null) {
+        if (lower.contains('eye') || lower.contains('drop')) {
+          matchedMed = activeMeds.where((m) => m.category == MedCategory.eyeDrop || m.category == MedCategory.eyeOintment).firstOrNull;
+        } else if (lower.contains('inhaler') || lower.contains('puff')) {
+          matchedMed = activeMeds.where((m) => m.category == MedCategory.inhaler).firstOrNull;
+        } else if (activeMeds.isNotEmpty) {
+          matchedMed = activeMeds.first;
+        }
+      }
+
+      return {
+        'type': 'log_dose',
+        'medication': matchedMed,
+        'medName': matchedMed?.name ?? 'Medication',
+        'raw': speech,
+      };
+    }
+
+    // 2. Detect Schedule Query Intent ("What do I have today?", "What is next?", "Schedule today")
+    final isQueryCommand = lower.contains('what do i have') ||
+        lower.contains('what medicines') ||
+        lower.contains('schedule today') ||
+        lower.contains('upcoming dose') ||
+        lower.contains('next medicine');
+
+    if (isQueryCommand) {
+      final todayCount = activeMeds.fold<int>(0, (sum, m) => sum + m.scheduleTimes.length);
+      final names = activeMeds.take(3).map((m) => m.name).join(', ');
+      final summary = todayCount > 0
+          ? 'You have $todayCount doses scheduled today, including $names.'
+          : 'You have no doses scheduled for today.';
+
+      return {
+        'type': 'query_today',
+        'count': todayCount,
+        'summary': summary,
+        'raw': speech,
+      };
+    }
+
+    // 3. Detect Reminder Scheduling Intent
     String medName = 'Eye Drops';
     bool isEyeDrop = lower.contains('eye') || lower.contains('drop') || lower.contains('ointment');
     List<String> times = [];
 
-    // Check specific known names
-    final knownMeds = ['latanoprost', 'timolol', 'atorvastatin', 'salbutamol', 'insulin', 'prednisolone', 'erythromycin', 'metformin'];
+    // Check against active medicines or common clinical drug names
+    final knownMeds = [
+      'latanoprost', 'timolol', 'atorvastatin', 'salbutamol',
+      'insulin', 'prednisolone', 'erythromycin', 'metformin',
+      'moxifloxacin', 'pred forte', 'nevanac', 'pantoprazole',
+      'amoxicillin', 'lisinopril', 'aspirin', 'paracetamol'
+    ];
+
     for (final m in knownMeds) {
       if (lower.contains(m)) {
-        medName = m[0].toUpperCase() + m.substring(1);
-        if (m == 'latanoprost' || m == 'timolol' || m == 'prednisolone' || m == 'erythromycin') {
+        medName = m.split(' ').map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+        if (m == 'latanoprost' || m == 'timolol' || m == 'prednisolone' || m == 'erythromycin' || m == 'moxifloxacin' || m == 'pred forte' || m == 'nevanac') {
           isEyeDrop = true;
         }
         break;
       }
     }
 
-    // Extract hours from words like "at 8 am and 8 pm", "at 9:00", etc.
+    // Extract hours from words like "at 8 am and 8 pm", "at 9:00", "at 10"
     final timePattern = RegExp(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)?', caseSensitive: false);
     final matches = timePattern.allMatches(lower);
     for (final m in matches) {
@@ -137,18 +231,80 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
 
     if (times.isEmpty) {
       if (lower.contains('morning')) times.add('08:00');
-      if (lower.contains('evening') || lower.contains('night')) times.add('20:00');
-      if (lower.contains('bedtime')) times.add('21:30');
+      if (lower.contains('afternoon') || lower.contains('lunch')) times.add('13:00');
+      if (lower.contains('evening') || lower.contains('dinner')) times.add('20:00');
+      if (lower.contains('bedtime') || lower.contains('night')) times.add('21:30');
     }
 
     if (times.isEmpty) times = ['08:00', '20:00'];
 
     return {
+      'type': 'schedule_reminder',
       'name': medName,
       'isEyeDrop': isEyeDrop,
       'times': times,
       'frequency': times.length == 1 ? 'Once daily' : times.length == 2 ? 'Twice daily' : 'Multiple times',
     };
+  }
+
+  void _executeLogDose(Medication med) {
+    final repo = context.read<MedicationRepository>();
+    final scheduledTime = med.scheduleTimes.isNotEmpty ? med.scheduleTimes.first : '08:00';
+
+    repo.logDose(
+      medication: med,
+      scheduledTime: scheduledTime,
+      status: LogStatus.taken,
+    );
+
+    HapticFeedback.heavyImpact();
+    _ttsService.speak('Confirmed. Logged ${med.name} as taken.');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF2D6A4F),
+        content: Text('✅ Logged ${med.name} as taken!'),
+      ),
+    );
+
+    Navigator.pop(context);
+  }
+
+  void _saveScheduleDirectly(Map<String, dynamic> intent) {
+    final repo = context.read<MedicationRepository>();
+    final isEye = intent['isEyeDrop'] as bool? ?? false;
+
+    final med = Medication(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: intent['name'] as String,
+      strength: 'Prescribed dose',
+      category: isEye ? MedCategory.eyeDrop : MedCategory.oral,
+      dosageUnit: isEye ? DosageUnit.drops : DosageUnit.tablets,
+      dosageAmount: 1,
+      instruction: AdminInstruction.afterMeal,
+      frequency: intent['frequency'] as String,
+      scheduleTimes: List<String>.from(intent['times'] as List),
+      totalInventoryCount: 30,
+      refillThreshold: 5,
+      colorHex: isEye ? '#0284C7' : '#2D6A4F',
+      iconName: isEye ? 'eye_drop' : 'pill',
+      requiresEyeDropProtocol: isEye,
+      eyeTarget: isEye ? 'Both Eyes (OU)' : null,
+      eyeDropGapMinutes: isEye ? 5 : 0,
+    );
+
+    repo.addMedication(med);
+    HapticFeedback.mediumImpact();
+    _ttsService.speak('Reminder scheduled for ${med.name}.');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF2D6A4F),
+        content: Text('✅ Reminder scheduled for ${med.name}!'),
+      ),
+    );
+
+    Navigator.pop(context);
   }
 
   @override
@@ -167,10 +323,11 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
           const Text('Voice Medication Assistant', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(
-            _isListening ? 'Listening... Speak your reminder' : 'Tap microphone to speak',
+            _isListening ? 'Listening... Speak your reminder or dose' : 'Tap microphone to speak',
             style: TextStyle(fontSize: 12, color: Colors.grey.withAlpha(204)),
           ),
           const SizedBox(height: 24),
+
           // Pulsing Mic Icon
           GestureDetector(
             onTap: _isListening ? _stopListening : _startListening,
@@ -187,12 +344,12 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
                       gradient: LinearGradient(
                         colors: _isListening
                             ? [MediMindTheme.alertRed, const Color(0xFFE11D48)]
-                            : [Theme.of(context).colorScheme.primary, const Color(0xFF0284C7)],
+                            : [const Color(0xFF2D6A4F), const Color(0xFF52B788)],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: (_isListening ? MediMindTheme.alertRed : Theme.of(context).colorScheme.primary).withAlpha(102),
+                          color: (_isListening ? MediMindTheme.alertRed : const Color(0xFF2D6A4F)).withAlpha(102),
                           blurRadius: 16,
                           spreadRadius: _isListening ? 4 : 0,
                         ),
@@ -205,6 +362,7 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
             ),
           ),
           const SizedBox(height: 20),
+
           // Transcript or example
           Container(
             width: double.infinity,
@@ -216,7 +374,7 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
             child: Text(
               _wordsSpoken.isNotEmpty
                   ? '“$_wordsSpoken”'
-                  : 'Example: "Remind me to use my eye drops at 8 AM and 8 PM"',
+                  : 'Try: "I took my eye drops", "Remind me at 8 AM", or "What do I have today?"',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -225,66 +383,165 @@ class _VoiceAssistantModalState extends State<VoiceAssistantModal> with SingleTi
               ),
             ),
           ),
+
           if (_parsedIntent != null) ...[
             const SizedBox(height: 16),
-            Card(
-              color: Theme.of(context).colorScheme.primary.withAlpha(20),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Theme.of(context).colorScheme.primary)),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.auto_awesome, color: Colors.amber, size: 18),
-                        SizedBox(width: 8),
-                        Text('Draft Schedule Created', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text('• Medication: ${_parsedIntent!['name']}', style: const TextStyle(fontSize: 13)),
-                    Text('• Frequency: ${_parsedIntent!['frequency']}', style: const TextStyle(fontSize: 13)),
-                    Text('• Scheduled Times: ${(_parsedIntent!['times'] as List).join(', ')}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                    if (_parsedIntent!['isEyeDrop'])
-                      const Text('• Eye Drop Protocol: Enabled (5-min safety interval)', style: TextStyle(fontSize: 12, color: Color(0xFF7C3AED))),
-                    const SizedBox(height: 14),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        final draft = Medication(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          name: _parsedIntent!['name'],
-                          strength: 'Prescribed dose',
-                          category: _parsedIntent!['isEyeDrop'] ? MedCategory.eyeDrop : MedCategory.oral,
-                          dosageUnit: _parsedIntent!['isEyeDrop'] ? DosageUnit.drops : DosageUnit.tablets,
-                          dosageAmount: 1,
-                          instruction: AdminInstruction.afterMeal,
-                          frequency: _parsedIntent!['frequency'],
-                          scheduleTimes: List<String>.from(_parsedIntent!['times']),
-                          totalInventoryCount: 30,
-                          refillThreshold: 5,
-                          colorHex: '#0284C7',
-                          iconName: _parsedIntent!['isEyeDrop'] ? 'eye_drop' : 'pill',
-                          requiresEyeDropProtocol: _parsedIntent!['isEyeDrop'],
-                          eyeTarget: 'Both Eyes (OU)',
-                          eyeDropGapMinutes: 5,
-                        );
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => AddMedicationScreen(editMedication: draft)),
-                        );
-                      },
-                      icon: const Icon(Icons.check),
-                      label: const Text('Review & Save Schedule'),
-                      style: FilledButton.styleFrom(minimumSize: const Size(double.infinity, 44), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            _buildIntentCard(context, _parsedIntent!),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildIntentCard(BuildContext context, Map<String, dynamic> intent) {
+    final type = intent['type'] as String;
+
+    if (type == 'log_dose') {
+      final med = intent['medication'] as Medication?;
+      return Card(
+        color: const Color(0xFFD8F3DC),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: Color(0xFF2D6A4F), size: 20),
+                  SizedBox(width: 8),
+                  Text('Dose Intake Detected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1B4332))),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Record intake for ${intent['medName']} now?',
+                style: const TextStyle(fontSize: 13, color: Color(0xFF2D6A4F)),
+              ),
+              const SizedBox(height: 12),
+              if (med != null)
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2D6A4F),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () => _executeLogDose(med),
+                  icon: const Icon(Icons.check),
+                  label: Text('Confirm Dose Taken (${med.name})'),
+                )
+              else
+                const Text('No matching active medication found to log.', style: TextStyle(fontSize: 11, color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (type == 'query_today') {
+      return Card(
+        color: const Color(0xFFF0FDF4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.calendar_month, color: Color(0xFF2D6A4F), size: 20),
+                  SizedBox(width: 8),
+                  Text("Today's Schedule Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1B4332))),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(intent['summary'] as String, style: const TextStyle(fontSize: 13, color: Color(0xFF2D6A4F))),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Schedule Reminder
+    return Card(
+      color: const Color(0xFFF4FBF7),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFF52B788)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.auto_awesome, color: Color(0xFF2D6A4F), size: 18),
+                SizedBox(width: 8),
+                Text('Draft Schedule Created', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1B4332))),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text('• Medication: ${intent['name']}', style: const TextStyle(fontSize: 13)),
+            Text('• Frequency: ${intent['frequency']}', style: const TextStyle(fontSize: 13)),
+            Text('• Scheduled Times: ${(intent['times'] as List).join(', ')}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            if (intent['isEyeDrop'] as bool? ?? false)
+              const Text('• Eye Drop Protocol: Enabled (5-min safety interval)', style: TextStyle(fontSize: 12, color: Color(0xFF0284C7))),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _saveScheduleDirectly(intent),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('Save Schedule'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2D6A4F),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    final isEye = intent['isEyeDrop'] as bool? ?? false;
+                    final draft = Medication(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: intent['name'] as String,
+                      strength: 'Prescribed dose',
+                      category: isEye ? MedCategory.eyeDrop : MedCategory.oral,
+                      dosageUnit: isEye ? DosageUnit.drops : DosageUnit.tablets,
+                      dosageAmount: 1,
+                      instruction: AdminInstruction.afterMeal,
+                      frequency: intent['frequency'] as String,
+                      scheduleTimes: List<String>.from(intent['times'] as List),
+                      totalInventoryCount: 30,
+                      refillThreshold: 5,
+                      colorHex: isEye ? '#0284C7' : '#2D6A4F',
+                      iconName: isEye ? 'eye_drop' : 'pill',
+                      requiresEyeDropProtocol: isEye,
+                      eyeTarget: isEye ? 'Both Eyes (OU)' : null,
+                      eyeDropGapMinutes: isEye ? 5 : 0,
+                    );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => AddMedicationScreen(editMedication: draft)),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Edit Details'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

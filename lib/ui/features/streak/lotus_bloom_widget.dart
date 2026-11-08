@@ -95,8 +95,8 @@ class _LotusPainter extends CustomPainter {
     final auraPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFFE879F9).withOpacity(0.35),
-          const Color(0xFFA21CAF).withOpacity(0.12),
+          const Color(0xFFE879F9).withValues(alpha: 0.35),
+          const Color(0xFFA21CAF).withValues(alpha: 0.12),
           Colors.transparent,
         ],
       ).createShader(Rect.fromCircle(center: center, radius: size.width * 0.48));
@@ -167,7 +167,7 @@ class _LotusPainter extends CustomPainter {
 
     // Delicate translucent border
     final borderPaint = Paint()
-      ..color = Colors.white.withOpacity(0.35)
+      ..color = Colors.white.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
     canvas.drawPath(path, borderPaint);

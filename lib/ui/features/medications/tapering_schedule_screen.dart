@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../data/repositories/medication_repository.dart';
 import '../../../domain/models/clinical_taper.dart';
@@ -307,7 +307,7 @@ class TaperingScheduleScreen extends StatelessWidget {
                     Navigator.pop(ctx);
                     AppleGlassDecorations.mediumHaptic();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('✓ Taper protocol attached to ')),
+                      SnackBar(content: Text('✓ Taper protocol attached to ${targetMed.name}')),
                     );
                   },
                   child: const Text('Attach Taper Protocol', style: TextStyle(fontWeight: FontWeight.bold)),

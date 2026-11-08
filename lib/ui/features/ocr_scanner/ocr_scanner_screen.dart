@@ -25,10 +25,34 @@ class _OcrScannerScreenState extends State<OcrScannerScreen> {
   List<ParsedMedicationDraft> _parsedDrafts = [];
   bool _isSpeaking = false;
   final _picker = ImagePicker();
-  final _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  TextRecognitionScript _selectedScript = TextRecognitionScript.latin;
+  late TextRecognizer _textRecognizer;
   final _parserService = PrescriptionParserService();
   final _interactionService = InteractionService();
   final _ttsService = TtsService();
+
+  @override
+  void initState() {
+    super.initState();
+    _textRecognizer = TextRecognizer(script: _selectedScript);
+  }
+
+  void _switchScript(TextRecognitionScript script) {
+    if (_selectedScript == script) return;
+    _textRecognizer.close();
+    setState(() {
+      _selectedScript = script;
+      _textRecognizer = TextRecognizer(script: script);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 2),
+        content: Text(
+          'OCR Script: ${script == TextRecognitionScript.latin ? "English / Latin" : "Devanagari (Hindi/Marathi)"}',
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -470,6 +494,22 @@ class _OcrScannerScreenState extends State<OcrScannerScreen> {
               color: _isSpeaking ? MediMindTheme.alertRed : null,
               onPressed: () => _toggleTtsSummary(selectedDrafts),
             ),
+          PopupMenuButton<TextRecognitionScript>(
+            icon: const Icon(Icons.translate_outlined),
+            tooltip: 'OCR Language Script',
+            initialValue: _selectedScript,
+            onSelected: _switchScript,
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: TextRecognitionScript.latin,
+                child: Text('Latin / English (Default)'),
+              ),
+              PopupMenuItem(
+                value: TextRecognitionScript.devanagari,
+                child: Text('Devanagari (Hindi / Marathi)'),
+              ),
+            ],
+          ),
           PopupMenuButton<({String title, String subtitle, String text})>(
             icon: const Icon(Icons.science_outlined),
             tooltip: 'Try Sample Prescriptions',
@@ -777,11 +817,31 @@ class _OcrScannerScreenState extends State<OcrScannerScreen> {
                         draft.name,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       ),
-                      if (draft.strength.isNotEmpty)
-                        Text(
-                          draft.strength,
-                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
-                        ),
+                      Row(
+                        children: [
+                          if (draft.strength.isNotEmpty)
+                            Text(
+                              draft.strength,
+                              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600),
+                            ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: draft.confidence >= 0.8 ? const Color(0xFFD8F3DC) : const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${(draft.confidence * 100).toInt()}% match',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: draft.confidence >= 0.8 ? const Color(0xFF2D6A4F) : const Color(0xFFB45309),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       if (draft.correctedFrom != null)
                         Container(
                           margin: const EdgeInsets.only(top: 4, bottom: 2),

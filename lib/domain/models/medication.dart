@@ -102,6 +102,7 @@ class Medication {
   final PillScoring pillScoring;
   final String? pillImprint;
   final String pillColorName;
+  final String? barcode;
 
   Medication({
     required this.id,
@@ -142,6 +143,7 @@ class Medication {
     this.pillScoring = PillScoring.unscored,
     this.pillImprint,
     this.pillColorName = 'White',
+    this.barcode,
   });
 
   bool get needsRefill => totalInventoryCount <= refillThreshold;
@@ -281,6 +283,7 @@ class Medication {
       'pillScoring': pillScoring.index,
       'pillImprint': pillImprint,
       'pillColorName': pillColorName,
+      'barcode': barcode,
     };
   }
 
@@ -324,6 +327,7 @@ class Medication {
       pillScoring: PillScoring.values[(json['pillScoring'] as int? ?? 0).clamp(0, PillScoring.values.length - 1)],
       pillImprint: json['pillImprint'] as String?,
       pillColorName: json['pillColorName'] as String? ?? 'White',
+      barcode: json['barcode'] as String?,
     );
   }
 
@@ -366,6 +370,7 @@ class Medication {
     PillScoring? pillScoring,
     String? pillImprint,
     String? pillColorName,
+    String? barcode,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -406,6 +411,7 @@ class Medication {
       pillScoring: pillScoring ?? this.pillScoring,
       pillImprint: pillImprint ?? this.pillImprint,
       pillColorName: pillColorName ?? this.pillColorName,
+      barcode: barcode ?? this.barcode,
     );
   }
 }

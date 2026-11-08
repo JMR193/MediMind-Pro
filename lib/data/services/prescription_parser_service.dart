@@ -1082,12 +1082,18 @@ class PrescriptionParserService {
       if (lower.startsWith(kw) || (lower.contains(kw) && line.length < 55)) {
         // If line contains a whole-word known medication name from dictionary, do not filter out!
         final containsKnownDrug = _drugDictionary.keys.any(
-          (k) => RegExp(r'\b' + RegExp.escape(k) + r'\b', caseSensitive: false).hasMatch(lower),
+          (k) => RegExp('\\b${RegExp.escape(k)}\\b', caseSensitive: false).hasMatch(lower),
         );
         if (!containsKnownDrug) return true;
       }
     }
     return false;
+  }
+
+  void _appendClinicalNote(ParsedMedicationDraft draft, String note) {
+    draft.clinicalNotes = (draft.clinicalNotes != null && draft.clinicalNotes!.isNotEmpty)
+        ? '${draft.clinicalNotes!} • $note'
+        : note;
   }
 
   // ──────────────────────────────────────────────────────────
@@ -1113,24 +1119,24 @@ class PrescriptionParserService {
 
       // Suspension Agitation Alert
       if (d.ophthalmicFormulation == OphthalmicFormulation.suspension || n.contains('pred') || n.contains('azopt') || n.contains('brinzolamide') || n.contains('nepafenac') || n.contains('nevanac') || n.contains('besivance') || n.contains('fml') || n.contains('rimexolone') || n.contains('maxidex') || n.contains('maxitrol') || n.contains('natamycin')) {
-        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Shake bottle vigorously for 10-15 seconds before each drop.';
+        _appendClinicalNote(d, 'Shake bottle vigorously for 10-15 seconds before each drop.');
       }
 
       // Beta-Blocker Punctal Occlusion Requirement
       if (n.contains('timolol') || n.contains('cosopt') || n.contains('combigan') || n.contains('azarga') || n.contains('duotrav') || n.contains('ganfort') || n.contains('xalacom') || n.contains('atropine')) {
-        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Apply 60-second punctal occlusion (press tear duct at nasal corner) to avoid systemic beta-blocker absorption.';
+        _appendClinicalNote(d, 'Apply 60-second punctal occlusion (press tear duct at nasal corner) to avoid systemic beta-blocker absorption.');
       }
 
       // Ointment Administration Timing
       if (d.isOintment || d.ophthalmicFormulation == OphthalmicFormulation.ointment) {
-        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Apply last at bedtime (10-15 min after liquid drops). Blurs vision temporarily.';
+        _appendClinicalNote(d, 'Apply last at bedtime (10-15 min after liquid drops). Blurs vision temporarily.');
       }
     }
 
     // Post-Op Multidrop Care & RSVP Emergency Endophthalmitis Notice
     if (eyeDrops.length >= 2 && eyeDrops.any((e) => e.name.toLowerCase().contains('moxi') || e.name.toLowerCase().contains('pred') || e.name.toLowerCase().contains('dexa') || e.name.toLowerCase().contains('cipro') || e.name.toLowerCase().contains('tobra') || e.name.toLowerCase().contains('vigamox'))) {
       for (final ed in eyeDrops) {
-        ed.clinicalNotes = (ed.clinicalNotes != null ? '${ed.clinicalNotes!} • ' : '') + 'Post-op care: Wear eye shield while sleeping. Do not rub eyes. If severe pain, light sensitivity, or sudden vision loss (RSVP) occurs, contact eye clinic immediately.';
+        _appendClinicalNote(ed, 'Post-op care: Wear eye shield while sleeping. Do not rub eyes. If severe pain, light sensitivity, or sudden vision loss (RSVP) occurs, contact eye clinic immediately.');
       }
     }
 
@@ -1150,7 +1156,7 @@ class PrescriptionParserService {
     // 4. Statin + Grapefruit / CYP3A4 Notice
     for (final d in drafts) {
       if (d.name.toLowerCase().contains('atorvastatin') || d.name.toLowerCase().contains('simvastatin')) {
-        d.clinicalNotes = (d.clinicalNotes != null ? '${d.clinicalNotes!} • ' : '') + 'Avoid grapefruit juice (inhibits CYP3A4 metabolism).';
+        _appendClinicalNote(d, 'Avoid grapefruit juice (inhibits CYP3A4 metabolism).');
       }
     }
   }

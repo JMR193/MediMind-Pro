@@ -92,7 +92,7 @@ class _StreakScreenState extends State<StreakScreen> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFC026D3).withOpacity(0.18),
+                        color: const Color(0xFFC026D3).withValues(alpha: 0.18),
                         blurRadius: 20,
                         offset: const Offset(0, 6),
                       ),
@@ -114,7 +114,7 @@ class _StreakScreenState extends State<StreakScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFC026D3).withOpacity(0.3),
+                              color: const Color(0xFFC026D3).withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(

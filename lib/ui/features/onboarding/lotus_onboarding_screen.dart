@@ -62,7 +62,7 @@ class _LotusOnboardingScreenState extends State<LotusOnboardingScreen> {
                     shape: BoxShape.circle,
                     color: _currentPage == index
                         ? const Color(0xFFE879F9)
-                        : Colors.white.withOpacity(0.2),
+                        : Colors.white.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -105,7 +105,7 @@ class _LotusOnboardingScreenState extends State<LotusOnboardingScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             height: 1.5,
-                            color: Colors.white.withOpacity(0.65),
+                            color: Colors.white.withValues(alpha: 0.65),
                           ),
                         ),
                       ),
@@ -133,7 +133,7 @@ class _LotusOnboardingScreenState extends State<LotusOnboardingScreen> {
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? const Color(0xFFE879F9)
-                              : Colors.white.withOpacity(0.15),
+                              : Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

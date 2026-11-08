@@ -196,7 +196,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2D6A4F).withOpacity(0.2),
+                      color: const Color(0xFF2D6A4F).withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -231,7 +231,7 @@ class DashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF52B788).withOpacity(0.15),
+            color: const Color(0xFF52B788).withValues(alpha: 0.15),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -282,7 +282,7 @@ class DashboardScreen extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 10,
-              backgroundColor: Colors.white.withOpacity(0.6),
+              backgroundColor: Colors.white.withValues(alpha: 0.6),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2D6A4F)),
             ),
           ),
@@ -324,7 +324,7 @@ class DashboardScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -587,7 +587,7 @@ class DashboardScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -666,7 +666,7 @@ class DashboardScreen extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: isTaken ? const Color(0xFFD8F3DC) : color.withOpacity(0.12),
+                color: isTaken ? const Color(0xFFD8F3DC) : color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -862,7 +862,7 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: a.$3.withOpacity(0.1),
+                        color: a.$3.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(a.$2, color: a.$3, size: 24),
@@ -944,7 +944,7 @@ class DashboardScreen extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.12),
+                      color: statusColor.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -968,7 +968,7 @@ class DashboardScreen extends StatelessWidget {
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

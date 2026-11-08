@@ -106,7 +106,7 @@ class _IntakeHistoryScreenState extends State<IntakeHistoryScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -227,7 +227,7 @@ class _IntakeHistoryScreenState extends State<IntakeHistoryScreen> {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -251,7 +251,7 @@ class _IntakeHistoryScreenState extends State<IntakeHistoryScreen> {
                     shape: BoxShape.circle,
                     color: isTaken ? const Color(0xFF2D6A4F) : Colors.transparent,
                     border: Border.all(
-                      color: isTaken ? const Color(0xFF2D6A4F) : Colors.grey.withOpacity(0.4),
+                      color: isTaken ? const Color(0xFF2D6A4F) : Colors.grey.withValues(alpha: 0.4),
                       width: 2,
                     ),
                   ),

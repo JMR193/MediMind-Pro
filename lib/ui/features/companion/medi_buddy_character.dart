@@ -242,11 +242,11 @@ class _MediBuddyCharacterState extends State<MediBuddyCharacter>
                           color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Theme.of(context).dividerColor.withOpacity(0.4),
+                            color: Theme.of(context).dividerColor.withValues(alpha: 0.4),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),

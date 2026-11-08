@@ -23,7 +23,7 @@ class FloatingPillNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(36),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF22593E).withOpacity(0.08),
+              color: const Color(0xFF22593E).withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -50,7 +50,7 @@ class FloatingPillNavBar extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF52B788).withOpacity(0.4),
+                      color: const Color(0xFF52B788).withValues(alpha: 0.4),
                       blurRadius: 14,
                       offset: const Offset(0, 4),
                     ),

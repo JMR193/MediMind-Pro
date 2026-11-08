@@ -172,7 +172,7 @@ class _TravelDoseShifterScreenState extends State<TravelDoseShifterScreen> {
                       const Text('Origin Timezone', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 4),
                       DropdownButtonFormField<GlobalTimeZone>(
-                        value: _origin,
+                        initialValue: _origin,
                         isExpanded: true,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -210,7 +210,7 @@ class _TravelDoseShifterScreenState extends State<TravelDoseShifterScreen> {
                       const Text('Destination', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       const SizedBox(height: 4),
                       DropdownButtonFormField<GlobalTimeZone>(
-                        value: _destination,
+                        initialValue: _destination,
                         isExpanded: true,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -257,7 +257,7 @@ class _TravelDoseShifterScreenState extends State<TravelDoseShifterScreen> {
             const SizedBox(height: 12),
             if (meds.isNotEmpty) ...[
               DropdownButtonFormField<Medication>(
-                value: _selectedMedication,
+                initialValue: _selectedMedication,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: 'Select Medication',
