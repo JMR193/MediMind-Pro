@@ -356,3 +356,42 @@
 - `test/eye_hospital_prescriptions_test.dart`: 8/8 tests passing (Cataract, Cornea, Glaucoma, Retina, Orbit post-op regimens).
 - `test/medicine_alarm_dialog_test.dart`: Verified dose logging, snoozing, and responsive layout.
 - `test/visuals_and_companion_unit_test.dart`: Verified mascot rendering across all moods (including sleeping radial shader) and companion card widget.
+
+## 10. Comprehensive Clinical & Architecture Upgrade (November 2026)
+
+### A. Deprecated API Modernization Across All UI Layers
+1. **Color withOpacity Migration**:
+   - Replaced all deprecated `.withOpacity(alpha)` calls with modern Flutter `.withValues(alpha: ...)` across:
+     - `FloatingPillNavBar`
+     - `LotusBloomWidget` & `LotusOnboardingScreen`
+     - `StreakScreen`
+     - `IntakeHistoryScreen`
+     - `DashboardScreen` (all 9 instances)
+     - `MediBuddyCharacter` (speech bubble & shadows)
+2. **Form & Widget Cleanups**:
+   - Fixed deprecated `value` parameter in `DropdownButtonFormField` within `TravelDoseShifterScreen` to `initialValue`.
+   - Fixed incomplete string interpolation in `TaperingScheduleScreen` snackbar.
+   - Refactored `PrescriptionParserService` note composition to eliminate string concatenation warnings.
+
+### B. Upgraded On-Device Voice Assistant Pipeline (`VoiceAssistantModal`)
+1. **Intelligent Dose Intake Recognition**:
+   - Automatically detects patient intake expressions (e.g., "I took my eye drops", "Took Timolol", "Already drank medicine").
+   - Matches against `MedicationRepository.activeMedications` with instant 1-tap logging, haptic feedback, and audio confirmation.
+2. **1-Tap Direct Reminder Scheduling**:
+   - Parses medication name, frequencies, and chronotherapy times (e.g., morning 08:00, bedtime 21:30).
+   - Enables direct 1-tap save into local SQLite/JSON repository without requiring manual form entry, plus optional detail review.
+3. **Voice Query Answering**:
+   - Responds to natural queries (e.g., "What medicines do I have today?") with speech synthesis via `TtsService`.
+
+### C. Advanced Multi-Script OCR Prescription Scanner (`OcrScannerScreen`)
+1. **Multi-Script Engine**:
+   - Supports on-the-fly switching between Latin (`TextRecognitionScript.latin`) and Devanagari (`TextRecognitionScript.devanagari`) for accurate transcription of regional Indian and Asian prescriptions.
+2. **Visual Confidence Badges**:
+   - Real-time display of OCR matching confidence percentages on each extracted medication draft card.
+3. **Barcode Scanning Compatibility**:
+   - Extended `Medication` model with `barcode` field for EAN-13 and GS1 pharmaceutical pack scanning.
+
+### D. Clinical Specialty Protocols & Compliance Verification
+- Strict zero-hospital-names compliance: All ophthalmic protocols use purely anatomical and subspecialty nomenclature (Cataract & Anterior Segment, Glaucoma Target-IOP, Cornea Refractive, Retina & Vitreoretinal, Orbit & Oculoplastics).
+- All changes tracked in Git commit `caa64d3` and synced with GitHub repository.
+
